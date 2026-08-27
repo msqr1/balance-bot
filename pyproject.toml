@@ -1,0 +1,15 @@
+[project]
+name = "balance-bot"
+version = "67"
+description = ""
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "adafruit-circuitpython-mpu6050>=1.3.8"
+]
+
+[project.optional-dependencies]
+dev = []
+
+[project.urls]
+Homepage = "https://github.com/msqr1/balance-bot"
