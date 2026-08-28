@@ -15,4 +15,5 @@ Homepage = "https://github.com/msqr1/balance-bot"
 [dependency-groups]
 dev = [
     "ruff>=0.16.5",
+    "circuitpython-stubs>=10.2.1",
 ]
