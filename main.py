@@ -17,13 +17,19 @@ mpu = FilteredMPU6050(
     signs=(-1, 1, -1),
 )
 
-motor = HBridgeMotor(
+
+motor_r = HBridgeMotor(  # Motor A
+    in1=25,
+    in2=18,
+    pwm=23,
+)
+motor_l = HBridgeMotor(  # Motor B
     in1=12,
-    in2=23,
-    pwm=16,
+    in2=16,
+    pwm=24,
 )
 
-kp = 0.0
+kp = 1.0
 ki = 0.0
 kd = 0.0
 
@@ -37,6 +43,7 @@ abort_angle = radians(45.0)
 
 def main() -> None:
     last_time = monotonic()
+    last_print = monotonic()
     while True:
         current_time = monotonic()
         dt = current_time - last_time
@@ -47,10 +54,15 @@ def main() -> None:
         pitch = mpu.pitch
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
-            motor.stop()
+            motor_r.stop()
+            motor_l.stop()
             break
-        speed = pid.calculate(dt, pitch)
-        motor.move(speed)
+        speed = -pid.calculate(dt, pitch)
+        motor_r.move(speed)
+        motor_l.move(speed)
+        if monotonic() - last_print > 1.0:
+            print(mpu)
+            last_print = monotonic()
 
 
 if __name__ == "__main__":
