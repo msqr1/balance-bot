@@ -19,4 +19,4 @@ class ComplementaryFilter:
     @staticmethod
     def get_acceleration_pitch(accel_x: float, accel_y: float, accel_z: float) -> float:
         """Get pitch (Y) in radians, where 0.0 is no tilt and forward is positive."""
-        return atan2(accel_x, hypot(accel_y, accel_z))
+        return atan2(-accel_x, hypot(accel_y, accel_z))
