@@ -39,11 +39,15 @@ class FilteredMPU6050(MPU6050):
 
     def update(self, dt: float) -> None:
         angular_velocity = self.oriented_gyro[1]
-        acceleration_pitch = self.complementary_filter.get_acceleration_pitch(
-            *self.oriented_acceleration
-        )
+        acceleration_pitch = self.acceleration_pitch
         self._pitch = self.complementary_filter.calculate(
             dt, angular_velocity, acceleration_pitch
+        )
+
+    @property
+    def acceleration_pitch(self) -> float:
+        return self.complementary_filter.get_acceleration_pitch(
+            *self.oriented_acceleration
         )
 
     @property
@@ -56,5 +60,6 @@ class FilteredMPU6050(MPU6050):
             f"<{type(self).__name__}{{acceleration={self.acceleration}, "
             f"gyro={self.gyro}, pitch={self.pitch}, temperature={self.temperature}, "
             f"oriented_acceleration={self.oriented_acceleration}, "
-            f"oriented_gyro={self.oriented_gyro}}}>"
+            f"oriented_gyro={self.oriented_gyro}, "
+            f"acceleration_pitch={self.acceleration_pitch}}}>"
         )
