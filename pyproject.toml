@@ -16,4 +16,8 @@ Homepage = "https://github.com/msqr1/balance-bot"
 dev = [
     "ruff>=0.16.5",
     "circuitpython-stubs>=10.2.1",
+    "mypy>=2.3.1",
 ]
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]
