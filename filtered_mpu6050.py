@@ -23,7 +23,7 @@ class FilteredMPU6050(MPU6050):
         if len(axes) != 3 or set(axes) != set(range(3)):
             raise ValueError(axes)
         self.axes = axes
-        if len(signs) != 3 or not set(axes).issubset({-1, 1}):
+        if len(signs) != 3 or not set(signs) <= {-1, 1}:
             raise ValueError(signs)
         self.signs = signs
 
