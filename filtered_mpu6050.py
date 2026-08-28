@@ -27,10 +27,20 @@ class FilteredMPU6050(MPU6050):
             raise ValueError(signs)
         self.signs = signs
 
+    @property
+    def oriented_acceleration(self) -> tuple[float, float, float]:
+        acceleration = self.acceleration
+        return tuple(acceleration[self.axes[i]] * self.signs[i] for i in range(3))
+
+    @property
+    def oriented_gyro(self) -> tuple[float, float, float]:
+        gyro = self.gyro
+        return tuple(gyro[self.axes[i]] * self.signs[i] for i in range(3))
+
     def update(self, dt: float) -> None:
-        angular_velocity = self.gyro[self.axes[1]]
+        angular_velocity = self.oriented_gyro[1]
         acceleration_pitch = self.complementary_filter.get_acceleration_pitch(
-            *(self.acceleration[axis] for axis in self.axes)
+            *self.oriented_acceleration
         )
         self._pitch = self.complementary_filter.calculate(
             dt, angular_velocity, acceleration_pitch
@@ -44,5 +54,7 @@ class FilteredMPU6050(MPU6050):
     def __repr__(self) -> str:
         return (
             f"<{type(self).__name__}{{acceleration={self.acceleration}, "
-            f"gyro={self.gyro}, pitch={self.pitch}, temperature={self.temperature}}}>"
+            f"gyro={self.gyro}, pitch={self.pitch}, temperature={self.temperature}, "
+            f"oriented_acceleration={self.oriented_acceleration}, "
+            f"oriented_gyro={self.oriented_gyro}}}>"
         )
