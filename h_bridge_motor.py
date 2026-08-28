@@ -19,3 +19,6 @@ class HBridgeMotor:
             self.in1.off()
             self.in2.off()
         self.pwm.value = abs(speed)
+
+    def stop(self) -> None:
+        self.move(0.0)
