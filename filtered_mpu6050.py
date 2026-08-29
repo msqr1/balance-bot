@@ -15,9 +15,9 @@ class FilteredMPU6050(MPU6050):
         signs: tuple[int, int, int] = (1, 1, 1),
     ) -> None:
         super().__init__(i2c_bus, address)
-        self._pitch = 0.0
+        self._oriented_pitch = 0.0
         self.complementary_filter = ComplementaryFilter(
-            filter_weight, last_angle=self._pitch
+            filter_weight, last_angle=self._oriented_pitch
         )
         self.filter_bandwidth = filter_bandwidth
         if len(axes) != 3 or set(axes) != set(range(3)):
@@ -38,28 +38,37 @@ class FilteredMPU6050(MPU6050):
         return tuple(gyro[self.axes[i]] * self.signs[i] for i in range(3))
 
     def update(self, dt: float) -> None:
-        angular_velocity = self.oriented_gyro[1]
-        acceleration_pitch = self.acceleration_pitch
-        self._pitch = self.complementary_filter.calculate(
-            dt, angular_velocity, acceleration_pitch
+        """Update the filtered pitch, each frame."""
+        pitch_angular_velocity = self.oriented_gyro[1]
+        oriented_acceleration_pitch = self.oriented_acceleration_pitch
+        self._oriented_pitch = self.complementary_filter.calculate(
+            dt, pitch_angular_velocity, oriented_acceleration_pitch
         )
 
     @property
-    def acceleration_pitch(self) -> float:
+    def oriented_acceleration_pitch(self) -> float:
+        """Get oriented pitch calculated purely from linear acceleration, in radians.
+
+        0.0 is no tilt and forward pitch is positive.
+        """
         return self.complementary_filter.get_acceleration_pitch(
             *self.oriented_acceleration
         )
 
     @property
-    def pitch(self) -> float:
-        """Get pitch in radians, where 0.0 is no tilt and forward pitch is positive."""
-        return self._pitch
+    def oriented_pitch(self) -> float:
+        """Get filtered oriented pitch in radians.
+
+        0.0 is no tilt and forward pitch is positive.
+        """
+        return self._oriented_pitch
 
     def __repr__(self) -> str:
         return (
             f"<{type(self).__name__}{{acceleration={self.acceleration}, "
-            f"gyro={self.gyro}, pitch={self.pitch}, temperature={self.temperature}, "
+            f"gyro={self.gyro}, temperature={self.temperature}, "
             f"oriented_acceleration={self.oriented_acceleration}, "
             f"oriented_gyro={self.oriented_gyro}, "
-            f"acceleration_pitch={self.acceleration_pitch}}}>"
+            f"oriented_pitch={self.oriented_pitch}, "
+            f"oriented_acceleration_pitch={self.oriented_acceleration_pitch}}}>"
         )

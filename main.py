@@ -51,7 +51,7 @@ def main() -> None:
             continue
         last_time = current_time
         mpu.update(dt)
-        pitch = mpu.pitch
+        pitch = mpu.oriented_pitch
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
             motor_r.stop()
