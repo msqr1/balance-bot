@@ -4,6 +4,8 @@ kd = 0.0
 kd_tau = 0.15
 feedforward = 0.0
 
+setpoint = 0.0
+
 tick_rate = 240.0
 
 abort_angle = 45.0
