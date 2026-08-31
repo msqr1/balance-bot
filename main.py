@@ -32,8 +32,9 @@ motor_l = HBridgeMotor(  # Motor B
 kp = 1.0
 ki = 0.0
 kd = 0.0
+feedforward = 0.0
 
-pid = PIDController(kp, ki, kd, setpoint=0.0)
+pid = PIDController(kp, ki, kd, feedforward, setpoint=0.0)
 
 
 tick_rate = 60.0
