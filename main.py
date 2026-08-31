@@ -33,7 +33,7 @@ kp = 1.0
 ki = 0.0
 kd = 0.0
 
-pid = PIDController(kp, ki, kd)
+pid = PIDController(kp, ki, kd, setpoint=0.0)
 
 
 tick_rate = 60.0
