@@ -39,7 +39,7 @@ feedforward = 0.0
 pid = PIDController(kp, ki, kd, kd_tau, feedforward, setpoint=0.0)
 
 
-tick_rate = 60.0
+tick_rate = 240.0
 
 abort_angle = radians(45.0)
 
