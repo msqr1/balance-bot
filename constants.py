@@ -1,7 +1,7 @@
 kp = 0.0
 ki = 0.0
 kd = 0.0
-kd_tau = 0.15
+kd_tau = 0.0
 feedforward = 0.0
 
 setpoint = -4.31
