@@ -4,7 +4,7 @@ kd = 0.0
 kd_tau = 0.15
 feedforward = 0.0
 
-setpoint = 0.0
+setpoint = -4.31
 
 tick_rate = 240.0
 
