@@ -1,18 +1,26 @@
-from math import radians
 from time import monotonic
 
 import board
 
+from constants import (
+    abort_angle,
+    complementary_filter_weight,
+    feedforward,
+    kd,
+    kd_tau,
+    ki,
+    kp,
+    tick_rate,
+)
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
 from pid_controller import PIDController
 
 i2c = board.I2C()
 
-filter_weight = 0.95
 mpu = FilteredMPU6050(
     i2c,
-    filter_weight=filter_weight,
+    filter_weight=complementary_filter_weight,
     filter_bandwidth=Bandwidth.BAND_5_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),
@@ -30,18 +38,7 @@ motor_l = HBridgeMotor(  # Motor B
     pwm=24,
 )
 
-kp = 0.0
-ki = 0.0
-kd = 0.0
-kd_tau = 0.15
-feedforward = 0.0
-
 pid = PIDController(kp, ki, kd, kd_tau, feedforward, setpoint=0.0)
-
-
-tick_rate = 240.0
-
-abort_angle = radians(45.0)
 
 
 def main() -> None:
