@@ -6,10 +6,10 @@ import board
 from constants import (
     abort_angle,
     complementary_filter_weight,
-    feedforward,
     kd,
     ki,
     kp,
+    ks,
     setpoint,
     tau,
     tick_rate,
@@ -40,7 +40,7 @@ motor_l = HBridgeMotor(  # Motor B
     pwm=24,
 )
 
-pid = PIDController(kp, ki, kd, tau, feedforward, setpoint=setpoint)
+pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
 
 
 def main() -> None:
