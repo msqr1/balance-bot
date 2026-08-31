@@ -1,5 +1,7 @@
 from math import nan
 
+from independent_ema import IndependentEMA
+
 
 class PIDController:
     def __init__(
@@ -7,6 +9,7 @@ class PIDController:
         kp: float = 0.0,
         ki: float = 0.0,
         kd: float = 0.0,
+        kd_tau: float = 0.1,
         feedforward: float = 0.0,
         setpoint: float = 0.0,
     ) -> None:
@@ -17,11 +20,13 @@ class PIDController:
         self.setpoint = setpoint
         self.error_integral = 0.0
         self.last_error = 0.0
+        self.derivative_ema = IndependentEMA(kd_tau)
 
     def calculate(self, dt: float, measurement: float) -> float:
         error = self.setpoint - measurement
         self.error_integral += error * dt
-        derivative = (error - self.last_error) / dt
+        raw_derivative = (error - self.last_error) / dt
+        derivative = self.derivative_ema.update(dt, raw_derivative)
         self.last_error = error
         return (
             self.kp * error
