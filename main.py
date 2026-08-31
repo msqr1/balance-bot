@@ -52,6 +52,8 @@ def main() -> None:
         dt = current_time - last_time
         if dt < 1.0 / tick_rate:
             continue
+        if dt > 2.0 / tick_rate:
+            print(f"LAG: {dt:.4f}")
         last_time = current_time
         mpu.update(dt)
         pitch = mpu.oriented_pitch
