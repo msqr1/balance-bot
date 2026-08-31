@@ -9,7 +9,7 @@ class PIDController:
         kp: float = 0.0,
         ki: float = 0.0,
         kd: float = 0.0,
-        kd_tau: float = 0.1,
+        tau: float = 0.1,
         feedforward: float = 0.0,
         setpoint: float = 0.0,
     ) -> None:
@@ -20,13 +20,13 @@ class PIDController:
         self.setpoint = setpoint
         self.error_integral = 0.0
         self.last_error = 0.0
-        self.derivative_ema = IndependentEMA(kd_tau)
+        self.value_ema = IndependentEMA(tau)
 
     def calculate(self, dt: float, measurement: float) -> float:
-        error = self.setpoint - measurement
+        value = self.value_ema.update(dt, measurement)
+        error = self.setpoint - value
         self.error_integral += error * dt
-        raw_derivative = (error - self.last_error) / dt
-        derivative = self.derivative_ema.update(dt, raw_derivative)
+        derivative = (error - self.last_error) / dt
         self.last_error = error
         return (
             self.kp * error
