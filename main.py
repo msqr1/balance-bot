@@ -1,3 +1,4 @@
+from math import degrees
 from time import monotonic
 
 import board
@@ -53,7 +54,7 @@ def main() -> None:
             print(f"LAG: {dt:.4f}")
         last_time = current_time
         mpu.update(dt)
-        pitch = mpu.oriented_pitch
+        pitch = degrees(mpu.oriented_pitch)
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
             motor_r.stop()
@@ -63,6 +64,7 @@ def main() -> None:
         motor_r.move(speed)
         motor_l.move(speed)
         if monotonic() - last_print > 1.0:
+            print(f"Pitch (deg): {pitch:.2f}")
             print(mpu)
             last_print = monotonic()
 
