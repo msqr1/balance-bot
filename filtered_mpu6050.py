@@ -39,8 +39,11 @@ class FilteredMPU6050(MPU6050):
 
     def update(self, dt: float) -> None:
         """Update the filtered pitch, each frame."""
-        pitch_angular_velocity = self.oriented_gyro[1]
-        oriented_acceleration_pitch = self.oriented_acceleration_pitch
+        try:
+            pitch_angular_velocity = self.oriented_gyro[1]
+            oriented_acceleration_pitch = self.oriented_acceleration_pitch
+        except OSError:
+            return
         self._oriented_pitch = self.complementary_filter.calculate(
             dt, pitch_angular_velocity, oriented_acceleration_pitch
         )
@@ -64,11 +67,14 @@ class FilteredMPU6050(MPU6050):
         return self._oriented_pitch
 
     def __repr__(self) -> str:
-        return (
-            f"<{type(self).__name__}{{acceleration={self.acceleration}, "
-            f"gyro={self.gyro}, temperature={self.temperature}, "
-            f"oriented_acceleration={self.oriented_acceleration}, "
-            f"oriented_gyro={self.oriented_gyro}, "
-            f"oriented_pitch={self.oriented_pitch}, "
-            f"oriented_acceleration_pitch={self.oriented_acceleration_pitch}}}>"
-        )
+        try:
+            return (
+                f"<{type(self).__name__}{{acceleration={self.acceleration}, "
+                f"gyro={self.gyro}, temperature={self.temperature}, "
+                f"oriented_acceleration={self.oriented_acceleration}, "
+                f"oriented_gyro={self.oriented_gyro}, "
+                f"oriented_pitch={self.oriented_pitch}, "
+                f"oriented_acceleration_pitch={self.oriented_acceleration_pitch}}}>"
+            )
+        except OSError as e:
+            return f"<{type(self).__name__}{e}>"
