@@ -8,10 +8,10 @@ from constants import (
     complementary_filter_weight,
     feedforward,
     kd,
-    kd_tau,
     ki,
     kp,
     setpoint,
+    tau,
     tick_rate,
 )
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
@@ -40,7 +40,7 @@ motor_l = HBridgeMotor(  # Motor B
     pwm=24,
 )
 
-pid = PIDController(kp, ki, kd, kd_tau, feedforward, setpoint=setpoint)
+pid = PIDController(kp, ki, kd, tau, feedforward, setpoint=setpoint)
 
 
 def main() -> None:
