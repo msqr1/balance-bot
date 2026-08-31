@@ -3,7 +3,7 @@ from time import monotonic
 
 import board
 
-from filtered_mpu6050 import FilteredMPU6050
+from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
 from pid_controller import PIDController
 
@@ -13,6 +13,7 @@ filter_weight = 0.95
 mpu = FilteredMPU6050(
     i2c,
     filter_weight=filter_weight,
+    filter_bandwidth=Bandwidth.BAND_5_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),
 )

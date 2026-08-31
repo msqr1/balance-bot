@@ -1,4 +1,5 @@
-from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050, Bandwidth
+from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050
+from adafruit_mpu6050 import Bandwidth as Bandwidth  # noqa: PLC0414
 from busio import I2C
 
 from complementary_filter import ComplementaryFilter
