@@ -51,6 +51,7 @@ def main() -> None:
         lambda: pid.value_ema.value,
         lambda: speed,
         lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,
+        lambda: pid.error_integral,
     )
     start_time = monotonic()
     last_time = monotonic()
