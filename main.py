@@ -1,4 +1,4 @@
-from math import cos, degrees
+from math import cos, degrees, sin
 from pathlib import Path
 from time import monotonic
 
@@ -69,15 +69,18 @@ def main() -> None:
         if dt > 2.0 / tick_rate:
             print(f"LAG: {dt:.4f}")
         last_time = current_time
+        pitch_rad = mpu.oriented_pitch
         try:
-            acceleration_x = mpu.oriented_acceleration[0]
+            acceleration = mpu.oriented_acceleration
         except OSError:
             pass
         else:
-            acceleration_linear = acceleration_x * cos(mpu.oriented_pitch)
+            acceleration_linear = acceleration[0] * cos(pitch_rad) + acceleration[
+                2
+            ] * sin(pitch_rad)
             velocity += acceleration_linear * dt
         mpu.update(dt)
-        pitch = degrees(mpu.oriented_pitch)
+        pitch = degrees(pitch_rad)
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
             motor_r.stop()
