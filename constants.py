@@ -4,7 +4,7 @@ kd = 0.0025
 ks = 0.00
 pitch_tau = 0.0025
 speed_tau = 0.0
-velocity_correction = -0.0
+velocity_correction = 0.0
 
 setpoint = -5.50
 
