@@ -1,4 +1,4 @@
-from math import cos, degrees, hypot, sin
+from math import atan, cos, degrees, hypot, sin
 from pathlib import Path
 from time import monotonic
 
@@ -15,6 +15,7 @@ from constants import (
     setpoint,
     speed_tau,
     tick_rate,
+    velocity_correction,
 )
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
@@ -69,17 +70,18 @@ def main() -> None:
         if dt > 2.0 / tick_rate:
             print(f"LAG: {dt:.4f}")
         last_time = current_time
+        mpu.update(dt)
         pitch_rad = mpu.oriented_pitch
         try:
             acceleration = mpu.oriented_acceleration
         except OSError:
-            pass
+            acceleration = 0.0, 0.0, 0.0
         else:
             acceleration_linear = acceleration[0] * cos(pitch_rad) + hypot(
                 acceleration[1], acceleration[2]
             ) * sin(pitch_rad)
             velocity += acceleration_linear * dt
-        mpu.update(dt)
+        pid.setpoint = setpoint + atan(velocity * velocity_correction)
         pitch = degrees(pitch_rad)
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
