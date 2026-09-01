@@ -50,7 +50,7 @@ def main() -> None:
         lambda: pitch,
         lambda: pid.value_ema.value,
         lambda: speed,
-        lambda: (pid.setpoint - pid.value_ema.value - pid.last_error) / dt,
+        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,
     )
     start_time = monotonic()
     last_time = monotonic()
@@ -70,6 +70,7 @@ def main() -> None:
             motor_r.stop()
             motor_l.stop()
             break
+        _last_error = pid.last_error
         speed = -pid.calculate(dt, pitch)
         motor_r.move(speed)
         motor_l.move(speed)
