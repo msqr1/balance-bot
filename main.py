@@ -45,52 +45,50 @@ pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
 
 
 def main() -> None:
-    logged_values = {
-        "raw_pitch": lambda: mpu.oriented_pitch,
-        "filtered_pitch": lambda: pid.value_ema.value,
-        "speed": lambda: speed,
-    }
+    loggers = (
+        lambda: current_time - start_time,
+        lambda: mpu.oriented_pitch,
+        lambda: pid.value_ema.value,
+        lambda: speed,
+    )
     start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
-    try:
-        for name in logged_values:
-            with (logs_directory / name).open("w+"):
-                pass  # Clear files
-        log_files = {name: (logs_directory / name).open("a") for name in logged_values}
-        while True:
-            current_time = monotonic()
-            dt = current_time - last_time
-            if dt < 1.0 / tick_rate:
-                continue
-            if dt > 2.0 / tick_rate:
-                print(f"LAG: {dt:.4f}")
-            last_time = current_time
-            mpu.update(dt)
-            pitch = degrees(mpu.oriented_pitch)
-            if abs(pitch) > abort_angle:
-                print("Robot fell. Aborting.")
-                motor_r.stop()
-                motor_l.stop()
-                break
-            speed = -pid.calculate(dt, pitch)
-            motor_r.move(speed)
-            motor_l.move(speed)
-            if monotonic() - last_print > 1.0:
-                print(f"Pitch (deg): {pitch:.2f}")
-                print(mpu)
-                last_print = monotonic()
-            elapsed = current_time - start_time
-            for name, get_value in logged_values.items():
-                log_files[name].write(f"{elapsed},{get_value()}")
-    finally:
-        for log_file in log_files.values():
-            log_file.close()
+    while True:
+        current_time = monotonic()
+        dt = current_time - last_time
+        if dt < 1.0 / tick_rate:
+            continue
+        if dt > 2.0 / tick_rate:
+            print(f"LAG: {dt:.4f}")
+        last_time = current_time
+        mpu.update(dt)
+        pitch = degrees(mpu.oriented_pitch)
+        if abs(pitch) > abort_angle:
+            print("Robot fell. Aborting.")
+            motor_r.stop()
+            motor_l.stop()
+            break
+        speed = -pid.calculate(dt, pitch)
+        motor_r.move(speed)
+        motor_l.move(speed)
+        if monotonic() - last_print > 1.0:
+            print(f"Pitch (deg): {pitch:.2f}")
+            print(mpu)
+            last_print = monotonic()
+        logged_values.append(tuple(logger() for logger in loggers))
 
 
-logs_directory = Path(".logs")
-logs_directory.mkdir(exist_ok=True)
+log_path = Path(".log")
+
+logged_values: list[tuple[float, ...]] = []
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        with log_path.open("w") as log_file:
+            log_file.writelines(
+                ",".join(map(str, values)) + "\n" for values in logged_values
+            )
