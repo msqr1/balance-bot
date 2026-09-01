@@ -54,11 +54,13 @@ def main() -> None:
         lambda: speed,
         lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,
         lambda: pid.error_integral,
+        lambda: velocity,
     )
     start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
     speed_ema = IndependentEMA(speed_tau)
+    velocity = 0.0
     while True:
         current_time = monotonic()
         dt = current_time - last_time
@@ -67,6 +69,7 @@ def main() -> None:
         if dt > 2.0 / tick_rate:
             print(f"LAG: {dt:.4f}")
         last_time = current_time
+        velocity += mpu.oriented_acceleration[0] * dt
         mpu.update(dt)
         pitch = degrees(mpu.oriented_pitch)
         if abs(pitch) > abort_angle:
