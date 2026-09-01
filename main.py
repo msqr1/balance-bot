@@ -1,4 +1,5 @@
 from math import degrees
+from pathlib import Path
 from time import monotonic
 
 import board
@@ -44,6 +45,7 @@ pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
 
 
 def main() -> None:
+    start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
     while True:
@@ -68,7 +70,14 @@ def main() -> None:
             print(f"Pitch (deg): {pitch:.2f}")
             print(mpu)
             last_print = monotonic()
+        filtered_pitch_log.write(f"{current_time - start_time},{pid.value_ema.value}\n")
+
+
+filtered_pitch_path = Path("filtered_pitch.txt")
 
 
 if __name__ == "__main__":
-    main()
+    with filtered_pitch_path.open("w") as filtered_pitch_log:
+        pass  # Clear file
+    with filtered_pitch_path.open("a") as filtered_pitch_log:
+        main()
