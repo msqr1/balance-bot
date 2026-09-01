@@ -11,12 +11,14 @@ from constants import (
     ki,
     kp,
     ks,
+    pitch_tau,
     setpoint,
-    tau,
+    speed_tau,
     tick_rate,
 )
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
+from independent_ema import IndependentEMA
 from pid_controller import PIDController
 
 i2c = board.I2C()
@@ -41,7 +43,7 @@ motor_l = HBridgeMotor(  # Motor B
     pwm=24,
 )
 
-pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
+pid = PIDController(kp, ki, kd, pitch_tau, ks, setpoint=setpoint)
 
 
 def main() -> None:
@@ -56,6 +58,7 @@ def main() -> None:
     start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
+    speed_ema = IndependentEMA(speed_tau)
     while True:
         current_time = monotonic()
         dt = current_time - last_time
@@ -72,7 +75,7 @@ def main() -> None:
             motor_l.stop()
             break
         _last_error = pid.last_error
-        speed = -pid.calculate(dt, pitch)
+        speed = speed_ema.update(dt, -pid.calculate(dt, pitch))
         motor_r.move(speed)
         motor_l.move(speed)
         if current_time - last_print > 1.0:
