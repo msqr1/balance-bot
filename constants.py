@@ -1,8 +1,8 @@
-kp = 0.60
-ki = 0.30
-kd = 0.0025
+kp = 0.30
+ki = 0.40
+kd = 0.001
 ks = 0.00
-pitch_tau = 0.0025
+pitch_tau = 0.0
 speed_tau = 0.0
 velocity_correction = 0.0
 
