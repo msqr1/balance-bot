@@ -16,9 +16,9 @@ class FilteredMPU6050(MPU6050):
         signs: tuple[int, int, int] = (1, 1, 1),
     ) -> None:
         super().__init__(i2c_bus, address)
-        self._oriented_pitch = self.oriented_acceleration_pitch
-        self.complementary_filter = ComplementaryFilter(
-            filter_weight, last_angle=self._oriented_pitch
+        self.complementary_filter = ComplementaryFilter(filter_weight)
+        self._oriented_pitch = self.complementary_filter.last_angle = (
+            self.oriented_acceleration_pitch
         )
         self.filter_bandwidth = filter_bandwidth
         if len(axes) != 3 or set(axes) != set(range(3)):
