@@ -47,7 +47,7 @@ pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
 def main() -> None:
     loggers = (
         lambda: current_time - start_time,
-        lambda: mpu.oriented_pitch,
+        lambda: pitch,
         lambda: pid.value_ema.value,
         lambda: speed,
     )
