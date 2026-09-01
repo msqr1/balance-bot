@@ -72,10 +72,10 @@ def main() -> None:
         speed = -pid.calculate(dt, pitch)
         motor_r.move(speed)
         motor_l.move(speed)
-        if monotonic() - last_print > 1.0:
-            print(f"Pitch (deg): {pitch:.2f}")
-            print(mpu)
-            last_print = monotonic()
+        if current_time - last_print > 1.0:
+            # print(f"Pitch (deg): {pitch:.2f}")
+            # print(mpu)
+            last_print = current_time
         logged_values.append(tuple(logger() for logger in loggers))
 
 
