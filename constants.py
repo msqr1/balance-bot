@@ -1,9 +1,9 @@
-kp = 0.60
-ki = 0.20
-kd = 0.001
-ks = 0.0
-pitch_tau = 0.010
-speed_tau = 0.010
+kp = 0.80
+ki = 0.30
+kd = 0.0015
+ks = 0.00
+pitch_tau = 0.005
+speed_tau = 0.005
 
 setpoint = -5.60
 
