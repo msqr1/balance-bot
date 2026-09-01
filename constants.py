@@ -1,12 +1,12 @@
-kp = 0.70
-ki = 0.0
-kd = 0.005
-ks = 0.1
-tau = 0.15
+kp = 0.60
+ki = 0.20
+kd = 0.001
+ks = 0.0
+tau = 0.010
 
-setpoint = -7.30
+setpoint = -5.60
 
-tick_rate = 240.0
+tick_rate = 250.0
 
 abort_angle = 45.0
 
