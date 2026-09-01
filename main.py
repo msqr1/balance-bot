@@ -45,39 +45,52 @@ pid = PIDController(kp, ki, kd, tau, ks, setpoint=setpoint)
 
 
 def main() -> None:
+    logged_values = {
+        "raw_pitch": lambda: mpu.oriented_pitch,
+        "filtered_pitch": lambda: pid.value_ema.value,
+        "speed": lambda: speed,
+    }
     start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
-    while True:
-        current_time = monotonic()
-        dt = current_time - last_time
-        if dt < 1.0 / tick_rate:
-            continue
-        if dt > 2.0 / tick_rate:
-            print(f"LAG: {dt:.4f}")
-        last_time = current_time
-        mpu.update(dt)
-        pitch = degrees(mpu.oriented_pitch)
-        if abs(pitch) > abort_angle:
-            print("Robot fell. Aborting.")
-            motor_r.stop()
-            motor_l.stop()
-            break
-        speed = -pid.calculate(dt, pitch)
-        motor_r.move(speed)
-        motor_l.move(speed)
-        if monotonic() - last_print > 1.0:
-            print(f"Pitch (deg): {pitch:.2f}")
-            print(mpu)
-            last_print = monotonic()
-        filtered_pitch_log.write(f"{current_time - start_time},{pid.value_ema.value}\n")
+    try:
+        for name in logged_values:
+            with (logs_directory / name).open("w+"):
+                pass  # Clear files
+        log_files = {name: (logs_directory / name).open("a") for name in logged_values}
+        while True:
+            current_time = monotonic()
+            dt = current_time - last_time
+            if dt < 1.0 / tick_rate:
+                continue
+            if dt > 2.0 / tick_rate:
+                print(f"LAG: {dt:.4f}")
+            last_time = current_time
+            mpu.update(dt)
+            pitch = degrees(mpu.oriented_pitch)
+            if abs(pitch) > abort_angle:
+                print("Robot fell. Aborting.")
+                motor_r.stop()
+                motor_l.stop()
+                break
+            speed = -pid.calculate(dt, pitch)
+            motor_r.move(speed)
+            motor_l.move(speed)
+            if monotonic() - last_print > 1.0:
+                print(f"Pitch (deg): {pitch:.2f}")
+                print(mpu)
+                last_print = monotonic()
+            elapsed = current_time - start_time
+            for name, get_value in logged_values.items():
+                log_files[name].write(f"{elapsed},{get_value()}")
+    finally:
+        for log_file in log_files.values():
+            log_file.close()
 
 
-filtered_pitch_path = Path("filtered_pitch.txt")
+logs_directory = Path(".logs")
+logs_directory.mkdir(exist_ok=True)
 
 
 if __name__ == "__main__":
-    with filtered_pitch_path.open("w") as filtered_pitch_log:
-        pass  # Clear file
-    with filtered_pitch_path.open("a") as filtered_pitch_log:
-        main()
+    main()
