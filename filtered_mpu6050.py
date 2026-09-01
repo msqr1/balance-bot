@@ -24,10 +24,14 @@ class FilteredMPU6050(MPU6050):
             raise ValueError(signs)
         self.signs = signs
         self.complementary_filter = ComplementaryFilter(filter_weight)
-        acceleration = self.acceleration
-        self._oriented_acceleration = tuple(
-            acceleration[self.axes[i]] * self.signs[i] for i in range(3)
-        )
+        try:
+            acceleration = self.acceleration
+        except OSError:
+            self._oriented_acceleration = 0.0, 0.0, 0.0
+        else:
+            self._oriented_acceleration = tuple(
+                acceleration[self.axes[i]] * self.signs[i] for i in range(3)
+            )
         self._oriented_pitch = self.complementary_filter.last_angle = (
             self.oriented_acceleration_pitch
         )
@@ -43,10 +47,14 @@ class FilteredMPU6050(MPU6050):
 
     def update(self, dt: float) -> None:
         """Update the filtered pitch, each frame."""
-        acceleration = self.acceleration
-        self._oriented_acceleration = tuple(
-            acceleration[self.axes[i]] * self.signs[i] for i in range(3)
-        )
+        try:
+            acceleration = self.acceleration
+        except OSError:
+            pass
+        else:
+            self._oriented_acceleration = tuple(
+                acceleration[self.axes[i]] * self.signs[i] for i in range(3)
+            )
         try:
             pitch_angular_velocity = self.oriented_gyro[1]
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
