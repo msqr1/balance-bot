@@ -30,6 +30,11 @@ mpu = FilteredMPU6050(
     filter_bandwidth=Bandwidth.BAND_5_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),
+    calibration_data=(
+        (-9.3741, 10.1954),
+        (-9.9044, 9.8148),
+        (-9.8029, 10.2050),
+    ),
 )
 
 

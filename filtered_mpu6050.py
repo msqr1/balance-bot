@@ -1,4 +1,4 @@
-from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050
+from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050, STANDARD_GRAVITY
 from adafruit_mpu6050 import Bandwidth as Bandwidth  # noqa: PLC0414
 from busio import I2C
 
@@ -14,8 +14,14 @@ class FilteredMPU6050(MPU6050):
         filter_bandwidth: int = Bandwidth.BAND_260_HZ,
         axes: tuple[int, int, int] = (0, 1, 2),
         signs: tuple[int, int, int] = (1, 1, 1),
+        calibration_data: tuple[
+            tuple[float, float],
+            tuple[float, float],
+            tuple[float, float],
+        ] = ((-STANDARD_GRAVITY, STANDARD_GRAVITY),) * 3,
     ) -> None:
         super().__init__(i2c_bus, address)
+        self.calibration_data = calibration_data
         self.filter_bandwidth = filter_bandwidth
         if len(axes) != 3 or set(axes) != set(range(3)):
             raise ValueError(axes)
@@ -25,13 +31,9 @@ class FilteredMPU6050(MPU6050):
         self.signs = signs
         self.complementary_filter = ComplementaryFilter(filter_weight)
         try:
-            acceleration = self.acceleration
+            self._oriented_acceleration = self._get_oriented_acceleration()
         except OSError:
             self._oriented_acceleration = 0.0, 0.0, 0.0
-        else:
-            self._oriented_acceleration = tuple(
-                acceleration[self.axes[i]] * self.signs[i] for i in range(3)
-            )
         self._oriented_pitch = self.complementary_filter.last_angle = (
             self.oriented_acceleration_pitch
         )
@@ -45,16 +47,20 @@ class FilteredMPU6050(MPU6050):
         gyro = self.gyro
         return tuple(gyro[self.axes[i]] * self.signs[i] for i in range(3))
 
+    def _get_oriented_acceleration(self) -> tuple[float, float, float]:
+        acceleration = self.acceleration
+        return tuple(
+            self._get_calibrated(acceleration[axis], *self.calibration_data[axis])
+            * sign
+            for axis, sign in zip(self.axes, self.signs, strict=True)
+        )  # type: ignore[return-value]
+
     def update(self, dt: float) -> None:
         """Update the filtered pitch, each frame."""
         try:
-            acceleration = self.acceleration
+            self._oriented_acceleration = self._get_oriented_acceleration()
         except OSError:
             pass
-        else:
-            self._oriented_acceleration = tuple(
-                acceleration[self.axes[i]] * self.signs[i] for i in range(3)
-            )
         try:
             pitch_angular_velocity = self.oriented_gyro[1]
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
@@ -94,3 +100,9 @@ class FilteredMPU6050(MPU6050):
             )
         except OSError as e:
             return f"<{type(self).__name__}{e}>"
+
+    @staticmethod
+    def _get_calibrated(raw: float, min_grav: float, max_grav: float) -> float:
+        center = (min_grav + max_grav) * 0.5
+        scale = (2.0 * STANDARD_GRAVITY) / (max_grav - min_grav)
+        return scale * (raw - center)
