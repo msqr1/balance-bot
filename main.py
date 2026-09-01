@@ -30,11 +30,6 @@ mpu = FilteredMPU6050(
     filter_bandwidth=Bandwidth.BAND_5_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),
-    calibration_data=(
-        (-9.3741, 10.1954),
-        (-9.9044, 9.8148),
-        (-9.8029, 10.2050),
-    ),
 )
 
 
@@ -56,12 +51,15 @@ def main() -> None:
     loggers = (
         lambda: current_time - start_time,  # Time
         lambda: pitch,  # Pitch
-        lambda: pid.value_ema.value,  # Filtered Pitch
-        lambda: speed,  # Speed
-        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
-        lambda: pid.error_integral,  # Integral
+        # lambda: pid.value_ema.value,  # Filtered Pitch
+        # lambda: speed,  # Speed
+        # lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
+        # lambda: pid.error_integral,  # Integral
         lambda: velocity,  # Velocity
-        lambda: pid.setpoint,  # Setpoint
+        # lambda: pid.setpoint,  # Setpoint
+        lambda: acceleration[0],
+        lambda: acceleration[1],
+        lambda: acceleration[2],
     )
     start_time = monotonic()
     last_time = monotonic()
