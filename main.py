@@ -1,4 +1,4 @@
-from math import cos, degrees, sin
+from math import cos, degrees, hypot, sin
 from pathlib import Path
 from time import monotonic
 
@@ -75,9 +75,9 @@ def main() -> None:
         except OSError:
             pass
         else:
-            acceleration_linear = acceleration[0] * cos(pitch_rad) + acceleration[
-                2
-            ] * sin(pitch_rad)
+            acceleration_linear = acceleration[0] * cos(pitch_rad) + hypot(
+                acceleration[1], acceleration[2]
+            ) * sin(pitch_rad)
             velocity += acceleration_linear * dt
         mpu.update(dt)
         pitch = degrees(pitch_rad)
