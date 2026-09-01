@@ -11,7 +11,9 @@ from constants import (
     ki,
     kp,
     ks,
+    left_multiplier,
     pitch_tau,
+    right_multiplier,
     setpoint,
     speed_tau,
     tick_rate,
@@ -98,10 +100,10 @@ def main() -> None:
             motor_l.stop()
             break
         _last_error = pid.last_error
-        speed = speed_ema.update(dt, -pid.calculate(dt, pitch))
-        motor_r.move(speed)
-        motor_l.move(speed)
-        if current_time - last_print > 1.0:
+        speed = min(max(speed_ema.update(dt, -pid.calculate(dt, pitch)), -1.0), 1.0)
+        motor_r.move(speed * right_multiplier)
+        motor_l.move(speed * left_multiplier)
+        if current_time - last_print > 0.2:
             # print(f"Pitch (deg): {pitch:.2f}")
             # print(mpu)
             last_print = current_time
