@@ -49,13 +49,14 @@ pid = PIDController(kp, ki, kd, pitch_tau, ks, setpoint=setpoint)
 
 def main() -> None:
     loggers = (
-        lambda: current_time - start_time,
-        lambda: pitch,
-        lambda: pid.value_ema.value,
-        lambda: speed,
-        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,
-        lambda: pid.error_integral,
-        lambda: velocity,
+        lambda: current_time - start_time,  # Time
+        lambda: pitch,  # Pitch
+        lambda: pid.value_ema.value,  # Filtered Pitch
+        lambda: speed,  # Speed
+        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
+        lambda: pid.error_integral,  # Integral
+        lambda: velocity,  # Velocity
+        lambda: pid.setpoint,  # Setpoint
     )
     start_time = monotonic()
     last_time = monotonic()
