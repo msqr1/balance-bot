@@ -58,15 +58,15 @@ def main() -> None:
     loggers = (
         lambda: current_time - start_time,  # Time
         lambda: pitch,  # Pitch
-        # lambda: pid.value_ema.value,  # Filtered Pitch
-        # lambda: speed,  # Speed
-        # lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
-        # lambda: pid.error_integral,  # Integral
+        lambda: pid.value_ema.value,  # Filtered Pitch
+        lambda: speed,  # Speed
+        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
+        lambda: pid.error_integral,  # Integral
         lambda: velocity,  # Velocity
-        # lambda: pid.setpoint,  # Setpoint
-        lambda: acceleration[0],
-        lambda: acceleration[1],
-        lambda: acceleration[2],
+        lambda: pid.setpoint,  # Setpoint
+        # lambda: acceleration[0],
+        # lambda: acceleration[1],
+        # lambda: acceleration[2],
     )
     start_time = monotonic()
     last_time = monotonic()
