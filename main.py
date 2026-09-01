@@ -1,4 +1,4 @@
-from math import degrees
+from math import cos, degrees
 from pathlib import Path
 from time import monotonic
 
@@ -69,7 +69,13 @@ def main() -> None:
         if dt > 2.0 / tick_rate:
             print(f"LAG: {dt:.4f}")
         last_time = current_time
-        velocity += mpu.oriented_acceleration[0] * dt
+        try:
+            acceleration_x = mpu.oriented_acceleration[0]
+        except OSError:
+            pass
+        else:
+            acceleration_linear = acceleration_x * cos(mpu.oriented_pitch)
+            velocity += acceleration_linear * dt
         mpu.update(dt)
         pitch = degrees(mpu.oriented_pitch)
         if abs(pitch) > abort_angle:
