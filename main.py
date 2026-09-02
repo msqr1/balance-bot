@@ -1,3 +1,4 @@
+from collections import defaultdict
 from math import atan, cos, degrees, hypot, sin
 from pathlib import Path
 from time import monotonic
@@ -14,7 +15,6 @@ from constants import (
     left_multiplier,
     pid_tau,
     pitch_rate_tau,
-    pitch_tau,
     right_multiplier,
     setpoint,
     speed_tau,
@@ -25,7 +25,7 @@ from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
 from independent_ema import IndependentEMA
 from kalman_filter import KalmanFilter
-from pid_controller import PIDController
+from pid_controller import PIDController, sign
 
 i2c = board.I2C()
 
@@ -60,19 +60,31 @@ pid = PIDController(kp, ki, kd, ks, pid_tau, setpoint=setpoint)
 
 
 def main() -> None:
-    loggers = (
-        lambda: current_time - start_time,  # Time
-        lambda: pitch,  # Pitch
-        lambda: pid.value_ema.value,  # Filtered Pitch
-        lambda: speed,  # Speed
-        lambda: pitch_rate,  # Derivative
-        lambda: pid.error_integral,  # Integral
-        lambda: velocity,  # Velocity
-        lambda: pid.setpoint,  # Setpoint
-        # lambda: acceleration[0],
-        # lambda: acceleration[1],
-        # lambda: acceleration[2],
-    )
+    get_time = lambda: current_time - start_time
+    grouped_loggers = {
+        "core": (
+            get_time,
+            lambda: pitch,  # Pitch
+            lambda: pid.value_ema.value,  # Filtered Pitch
+            lambda: clamped_speed,  # Speed
+            lambda: pid.setpoint,  # Setpoint
+        ),
+        "contribution": (
+            get_time,
+            lambda: speed,
+            lambda: (pid.setpoint - pid.value_ema.value) * kp,  # kp
+            lambda: pid.error_integral * ki,  # ki
+            lambda: pitch_rate * kd,  # kd
+            lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
+        ),
+        "acceleration": (
+            get_time,
+            lambda: velocity,
+            lambda: acceleration[0],
+            lambda: acceleration[1],
+            lambda: acceleration[2],
+        ),
+    }
     start_time = monotonic()
     last_time = monotonic()
     last_print = monotonic()
@@ -106,29 +118,30 @@ def main() -> None:
             motor_r.stop()
             motor_l.stop()
             break
-        _last_error = pid.last_error
-        speed = enable_motors * min(
-            max(speed_ema.update(dt, -pid.calculate(dt, pitch, pitch_rate)), -1.0), 1.0
-        )
-        motor_r.move(speed * right_multiplier)
-        motor_l.move(speed * left_multiplier)
+        speed = -pid.calculate(dt, pitch, pitch_rate)
+        clamped_speed = enable_motors * min(max(speed_ema.update(dt, speed), -1.0), 1.0)
+        motor_r.move(clamped_speed * right_multiplier)
+        motor_l.move(clamped_speed * left_multiplier)
         if current_time - last_print > 0.2:
             # print(f"Pitch (deg): {pitch:.2f}")
             # print(mpu)
             last_print = current_time
-        logged_values.append(tuple(logger() for logger in loggers))
+        for group, loggers in grouped_loggers.items():
+            logged_values[group].append(tuple(logger() for logger in loggers))
 
 
-log_path = Path(".log")
+logs_directory = Path(".logs")
+logs_directory.mkdir(exist_ok=True)
 
-logged_values: list[tuple[float, ...]] = []
+logged_values: defaultdict[str, list[tuple[float, ...]]] = defaultdict(list)
 
 
 if __name__ == "__main__":
     try:
         main()
     finally:
-        with log_path.open("w") as log_file:
-            log_file.writelines(
-                ",".join(map(str, values)) + "\n" for values in logged_values
-            )
+        for group, values in logged_values.items():
+            with (logs_directory / f"{group}.txt").open("w") as log_file:
+                log_file.writelines(
+                    ",".join(f"{value:.10f}" for value in row) + "\n" for row in values
+                )
