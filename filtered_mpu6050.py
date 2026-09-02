@@ -44,6 +44,7 @@ class FilteredMPU6050(MPU6050):
         self._oriented_pitch = self.digital_filter.angle = (
             self.oriented_acceleration_pitch
         )
+        self._oriented_gyro = 0.0, 0.0, 0.0
 
     @property
     def oriented_acceleration(self) -> tuple[float, float, float]:
@@ -51,8 +52,7 @@ class FilteredMPU6050(MPU6050):
 
     @property
     def oriented_gyro(self) -> tuple[float, float, float]:
-        gyro = self.gyro
-        return tuple(gyro[self.axes[i]] * self.signs[i] for i in range(3))
+        return self._oriented_gyro
 
     def _get_oriented_acceleration(self) -> tuple[float, float, float]:
         acceleration = self.acceleration
@@ -68,6 +68,14 @@ class FilteredMPU6050(MPU6050):
             self._oriented_acceleration = self._get_oriented_acceleration()
         except OSError:
             pass
+        try:
+            gyro = self.gyro
+        except OSError:
+            pass
+        else:
+            self._oriented_gyro = tuple(
+                gyro[self.axes[i]] * self.signs[i] for i in range(3)
+            )
         try:
             pitch_angular_velocity = self.oriented_gyro[1]
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
