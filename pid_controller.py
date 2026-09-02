@@ -30,7 +30,7 @@ class PIDController:
         return (
             self.kp * error
             + self.ki * self.error_integral
-            + self.kd * measurement_rate
+            - self.kd * measurement_rate  # Error rate is negative of measurement rate
             + self.ks * sign(error)
         )
 
