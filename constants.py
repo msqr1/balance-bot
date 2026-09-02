@@ -13,6 +13,8 @@ tick_rate = 120.0
 
 abort_angle = 45.0
 
+kalman_r_measure = 0.03
+
 # complementary_filter_weight = 0.98
 
 left_multiplier = 1.0
