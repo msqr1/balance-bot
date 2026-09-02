@@ -14,6 +14,7 @@ from constants import (
     kp,
     ks,
     left_multiplier,
+    pitch_rate_tau,
     pitch_tau,
     right_multiplier,
     setpoint,
@@ -77,6 +78,7 @@ def main() -> None:
     last_time = monotonic()
     last_print = monotonic()
     speed_ema = IndependentEMA(speed_tau)
+    pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     velocity = 0.0
     while True:
         current_time = monotonic()

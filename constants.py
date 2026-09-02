@@ -1,14 +1,15 @@
-kp = 0.50
-ki = 2.00
-kd = 0.006
-ks = 0.00
-pitch_tau = 0.0
-speed_tau = 0.0
+kp = 0.60
+ki = 0.00
+kd = -0.0005
+ks = 0.15
+pitch_tau = 0.00
+pitch_rate_tau = 0.010
+speed_tau = 0.00
 velocity_correction = 0.0
 
 setpoint = -5.40
 
-tick_rate = 250.0
+tick_rate = 120.0
 
 abort_angle = 45.0
 
