@@ -7,6 +7,7 @@ import board
 from constants import (
     abort_angle,
     complementary_filter_weight,
+    enable_motors,
     kd,
     ki,
     kp,
@@ -100,7 +101,9 @@ def main() -> None:
             motor_l.stop()
             break
         _last_error = pid.last_error
-        speed = min(max(speed_ema.update(dt, -pid.calculate(dt, pitch)), -1.0), 1.0)
+        speed = enable_motors * min(
+            max(speed_ema.update(dt, -pid.calculate(dt, pitch)), -1.0), 1.0
+        )
         motor_r.move(speed * right_multiplier)
         motor_l.move(speed * left_multiplier)
         if current_time - last_print > 0.2:
