@@ -13,7 +13,7 @@ tick_rate = 120.0
 
 abort_angle = 45.0
 
-complementary_filter_weight = 0.98
+# complementary_filter_weight = 0.98
 
 left_multiplier = 1.0
 right_multiplier = 0.8

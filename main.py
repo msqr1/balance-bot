@@ -4,10 +4,8 @@ from time import monotonic
 
 import board
 
-from complementary_filter import ComplementaryFilter
 from constants import (
     abort_angle,
-    complementary_filter_weight,
     enable_motors,
     kd,
     ki,
