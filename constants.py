@@ -1,12 +1,12 @@
-kp = 0.40
-ki = 0.40
-kd = 0.003
+kp = 0.50
+ki = 2.00
+kd = 0.006
 ks = 0.00
-pitch_tau = 0.005
+pitch_tau = 0.0
 speed_tau = 0.0
-velocity_correction = 0.25
+velocity_correction = 0.0
 
-setpoint = -6.00
+setpoint = -5.40
 
 tick_rate = 250.0
 
