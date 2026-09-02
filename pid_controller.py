@@ -19,7 +19,6 @@ class PIDController:
         self.ks = ks
         self.setpoint = setpoint
         self.error_integral = 0.0
-        self.last_error = 0.0
         self.value_ema = IndependentEMA(tau)
 
     def calculate(
@@ -28,7 +27,6 @@ class PIDController:
         value = self.value_ema.update(dt, measurement)
         error = self.setpoint - value
         self.error_integral += error * dt
-        self.last_error = error
         return (
             self.kp * error
             + self.ki * self.error_integral
