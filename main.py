@@ -73,11 +73,12 @@ def main() -> None:
         ),
         "contribution": (
             get_time,
-            lambda: -speed,  # Speed was inverted after calculating it from gains
+            # lambda: -speed,  # Speed was inverted after calculating it from gains
             lambda: (pid.setpoint - pid.value_ema.value) * kp,  # kp
             lambda: pid.error_integral * ki,  # ki
             lambda: pitch_rate * kd,  # kd
             lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
+            lambda: -kv * velocity,  # kv
         ),
         "acceleration": (
             get_time,
