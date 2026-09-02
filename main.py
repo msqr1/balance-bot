@@ -12,6 +12,7 @@ from constants import (
     kp,
     ks,
     left_multiplier,
+    pid_tau,
     pitch_rate_tau,
     pitch_tau,
     right_multiplier,
@@ -55,7 +56,7 @@ motor_l = HBridgeMotor(  # Motor B
     pwm=24,
 )
 
-pid = PIDController(kp, ki, kd, pitch_tau, ks, setpoint=setpoint)
+pid = PIDController(kp, ki, kd, ks, pid_tau, setpoint=setpoint)
 
 
 def main() -> None:

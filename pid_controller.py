@@ -9,8 +9,8 @@ class PIDController:
         kp: float = 0.0,
         ki: float = 0.0,
         kd: float = 0.0,
-        tau: float = 0.1,
         ks: float = 0.0,
+        tau: float = 0.1,
         setpoint: float = 0.0,
     ) -> None:
         self.kp = kp
