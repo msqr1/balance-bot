@@ -89,7 +89,7 @@ def main() -> None:
             acceleration = 0.0, 0.0, 0.0
         else:
             acceleration_linear = acceleration[0] * cos(pitch_rad) + hypot(
-                acceleration[1], acceleration[2]
+                0.0 * acceleration[1], acceleration[2]
             ) * sin(pitch_rad)
             velocity += acceleration_linear * dt
         pid.setpoint = setpoint - atan(velocity * velocity_correction)
