@@ -36,7 +36,7 @@ while i < samples:
 
     # Visual feedback every 50 samples
     if (i + 1) % 50 == 0:
-        print(f"  Progress: {((i + 1) / samples):.0%}% Done...")
+        print(f"  Progress: {((i + 1) / samples):.0%} Done...")
 
     time.sleep(0.01)  # 10ms delay between samples
     i += 1
@@ -56,4 +56,4 @@ print(f"  Y-Axis Bias: {bias_y:+.6f} rad/s ({degrees(bias_y):+.4f}°/s)")
 print(f"  Z-Axis Bias: {bias_z:+.6f} rad/s ({degrees(bias_z):+.4f}°/s)")
 
 print("\n=======================================================")
-print(f"calibrated_gyro=({bias_x:.6f},{bias_y:.6f},{bias_z:.6f})")
+print(f"calibrated_gyro=({bias_x:.6f}, {bias_y:.6f}, {bias_z:.6f})")
