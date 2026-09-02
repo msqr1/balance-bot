@@ -1,3 +1,5 @@
+from math import atan2, hypot
+
 from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050, STANDARD_GRAVITY
 from adafruit_mpu6050 import Bandwidth as Bandwidth  # noqa: PLC0414
 from busio import I2C
@@ -66,8 +68,8 @@ class FilteredMPU6050(MPU6050):
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
         except OSError:
             return
-        self._oriented_pitch = self.complementary_filter.calculate(
-            dt, pitch_angular_velocity, oriented_acceleration_pitch
+        self._oriented_pitch = self.complementary_filter.update(
+            dt, oriented_acceleration_pitch, pitch_angular_velocity
         )
 
     @property
@@ -76,9 +78,7 @@ class FilteredMPU6050(MPU6050):
 
         0.0 is no tilt and forward pitch is positive.
         """
-        return self.complementary_filter.get_acceleration_pitch(
-            *self.oriented_acceleration
-        )
+        return get_acceleration_pitch(*self.oriented_acceleration)
 
     @property
     def oriented_pitch(self) -> float:
@@ -106,3 +106,8 @@ class FilteredMPU6050(MPU6050):
         center = (min_grav + max_grav) * 0.5
         scale = (2.0 * STANDARD_GRAVITY) / (max_grav - min_grav)
         return scale * (raw - center)
+
+
+def get_acceleration_pitch(accel_x: float, accel_y: float, accel_z: float) -> float:
+    """Get pitch (Y) in radians, where 0.0 is no tilt and forward is positive."""
+    return atan2(-accel_x, hypot(accel_y, accel_z))
