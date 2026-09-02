@@ -109,7 +109,7 @@ def main() -> None:
                 0.0 * acceleration[1], acceleration[2]
             ) * sin(pitch_rad)
             velocity += acceleration_linear * dt
-        pid.setpoint = setpoint - atan(velocity * velocity_correction)
+        pid.setpoint = setpoint - degrees(atan(velocity * velocity_correction))
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
         if abs(pitch) > abort_angle:
