@@ -112,7 +112,7 @@ def main() -> None:
             velocity += acceleration_linear * dt
         pid.setpoint = setpoint - atan(velocity * velocity_correction)
         pitch = degrees(pitch_rad)
-        pitch_rate = degrees(mpu.oriented_gyro[1])
+        pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
             motor_r.stop()
