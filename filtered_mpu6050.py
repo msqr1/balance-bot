@@ -23,10 +23,12 @@ class FilteredMPU6050(MPU6050):
         signs: tuple[int, int, int] = (1, 1, 1),
         calibrated_centers: tuple[float, float, float] = (0.0, 0.0, 0.0),
         calibrated_scales: tuple[float, float, float] = (1.0, 1.0, 1.0),
+        calibrated_gyro_offsets: tuple[float, float, float] = (0.0, 0.0, 0.0),
     ) -> None:
         super().__init__(i2c_bus, address)
         self.calibrated_centers = calibrated_centers
         self.calibrated_scales = calibrated_scales
+        self.calibrated_gyro_offsets = calibrated_gyro_offsets
         self.filter_bandwidth = filter_bandwidth
         if len(axes) != 3 or set(axes) != set(range(3)):
             raise ValueError(axes)
@@ -45,6 +47,27 @@ class FilteredMPU6050(MPU6050):
         self._oriented_gyro = 0.0, 0.0, 0.0
 
     @property
+    def calibrated_acceleration(self) -> tuple[float, float, float]:
+        return tuple(
+            (acceleration - center) * scale
+            for acceleration, center, scale in zip(
+                self.acceleration,
+                self.calibrated_centers,
+                self.calibrated_scales,
+                strict=True,
+            )
+        )
+
+    @property
+    def calibrated_gyro(self) -> tuple[float, float, float]:
+        return tuple(
+            gyro - gyro_offset
+            for gyro, gyro_offset in zip(
+                self.gyro, self.calibrated_gyro_offsets, strict=True
+            )
+        )
+
+    @property
     def oriented_acceleration(self) -> tuple[float, float, float]:
         return self._oriented_acceleration
 
@@ -53,13 +76,11 @@ class FilteredMPU6050(MPU6050):
         return self._oriented_gyro
 
     def _get_oriented_acceleration(self) -> tuple[float, float, float]:
-        acceleration = self.acceleration
+        acceleration = self.calibrated_acceleration
         return tuple(
-            (acceleration[axis] - self.calibrated_centers[axis])
-            * self.calibrated_scales[axis]
-            * sign
+            acceleration[axis] * sign
             for axis, sign in zip(self.axes, self.signs, strict=True)
-        )
+        )  # type: ignore[return-value]
 
     def update(self, dt: float) -> None:
         """Update the filtered pitch, each frame."""
@@ -68,13 +89,13 @@ class FilteredMPU6050(MPU6050):
         except OSError:
             pass
         try:
-            gyro = self.gyro
+            gyro = self.calibrated_gyro
         except OSError:
             pass
         else:
             self._oriented_gyro = tuple(
                 gyro[self.axes[i]] * self.signs[i] for i in range(3)
-            )
+            )  # type: ignore[assignment]
         try:
             pitch_angular_velocity = self.oriented_gyro[1]
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
@@ -103,8 +124,10 @@ class FilteredMPU6050(MPU6050):
     def __repr__(self) -> str:
         try:
             return (
-                f"<{type(self).__name__}{{acceleration={self.acceleration}, "
-                f"gyro={self.gyro}, temperature={self.temperature}, "
+                f"<{type(self).__name__}{{"
+                f"calibrated_acceleration={self.calibrated_acceleration}, "
+                f"calibrated_gyro={self.calibrated_gyro}, "
+                f"temperature={self.temperature}, "
                 f"oriented_acceleration={self.oriented_acceleration}, "
                 f"oriented_gyro={self.oriented_gyro}, "
                 f"oriented_pitch={self.oriented_pitch}, "
