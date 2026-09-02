@@ -22,16 +22,17 @@ class PIDController:
         self.last_error = 0.0
         self.value_ema = IndependentEMA(tau)
 
-    def calculate(self, dt: float, measurement: float) -> float:
+    def calculate(
+        self, dt: float, measurement: float, measurement_rate: float
+    ) -> float:
         value = self.value_ema.update(dt, measurement)
         error = self.setpoint - value
         self.error_integral += error * dt
-        error_derivative = (error - self.last_error) / dt
         self.last_error = error
         return (
             self.kp * error
             + self.ki * self.error_integral
-            + self.kd * error_derivative
+            + self.kd * measurement_rate
             + self.ks * sign(error)
         )
 

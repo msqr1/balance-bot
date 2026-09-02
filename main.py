@@ -65,7 +65,7 @@ def main() -> None:
         lambda: pitch,  # Pitch
         lambda: pid.value_ema.value,  # Filtered Pitch
         lambda: speed,  # Speed
-        lambda: (pid.setpoint - pid.value_ema.value - _last_error) / dt,  # Derivative
+        lambda: pitch_rate,  # Derivative
         lambda: pid.error_integral,  # Integral
         lambda: velocity,  # Velocity
         lambda: pid.setpoint,  # Setpoint
@@ -99,6 +99,7 @@ def main() -> None:
             velocity += acceleration_linear * dt
         pid.setpoint = setpoint - atan(velocity * velocity_correction)
         pitch = degrees(pitch_rad)
+        pitch_rate = degrees(mpu.oriented_gyro[1])
         if abs(pitch) > abort_angle:
             print("Robot fell. Aborting.")
             motor_r.stop()
@@ -106,7 +107,7 @@ def main() -> None:
             break
         _last_error = pid.last_error
         speed = enable_motors * min(
-            max(speed_ema.update(dt, -pid.calculate(dt, pitch)), -1.0), 1.0
+            max(speed_ema.update(dt, -pid.calculate(dt, pitch, pitch_rate)), -1.0), 1.0
         )
         motor_r.move(speed * right_multiplier)
         motor_l.move(speed * left_multiplier)
