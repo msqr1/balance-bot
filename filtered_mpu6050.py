@@ -1,7 +1,7 @@
 from math import atan2, hypot
 from typing import Protocol
 
-from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050, STANDARD_GRAVITY
+from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050
 from adafruit_mpu6050 import Bandwidth as Bandwidth  # noqa: PLC0414
 from busio import I2C
 
@@ -21,14 +21,12 @@ class FilteredMPU6050(MPU6050):
         filter_bandwidth: int = Bandwidth.BAND_260_HZ,
         axes: tuple[int, int, int] = (0, 1, 2),
         signs: tuple[int, int, int] = (1, 1, 1),
-        calibration_data: tuple[
-            tuple[float, float],
-            tuple[float, float],
-            tuple[float, float],
-        ] = ((-STANDARD_GRAVITY, STANDARD_GRAVITY),) * 3,
+        calibrated_centers: tuple[float, float, float] = (0.0, 0.0, 0.0),
+        calibrated_scales: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> None:
         super().__init__(i2c_bus, address)
-        self.calibration_data = calibration_data
+        self.calibrated_centers = calibrated_centers
+        self.calibrated_scales = calibrated_scales
         self.filter_bandwidth = filter_bandwidth
         if len(axes) != 3 or set(axes) != set(range(3)):
             raise ValueError(axes)
@@ -57,10 +55,11 @@ class FilteredMPU6050(MPU6050):
     def _get_oriented_acceleration(self) -> tuple[float, float, float]:
         acceleration = self.acceleration
         return tuple(
-            self._get_calibrated(acceleration[axis], *self.calibration_data[axis])
+            (acceleration[axis] - self.calibrated_centers[axis])
+            * self.calibrated_scales[axis]
             * sign
             for axis, sign in zip(self.axes, self.signs, strict=True)
-        )  # type: ignore[return-value]
+        )
 
     def update(self, dt: float) -> None:
         """Update the filtered pitch, each frame."""
@@ -113,12 +112,6 @@ class FilteredMPU6050(MPU6050):
             )
         except OSError as e:
             return f"<{type(self).__name__}{e}>"
-
-    @staticmethod
-    def _get_calibrated(raw: float, min_grav: float, max_grav: float) -> float:
-        center = (min_grav + max_grav) * 0.5
-        scale = (2.0 * STANDARD_GRAVITY) / (max_grav - min_grav)
-        return scale * (raw - center)
 
 
 def get_acceleration_pitch(accel_x: float, accel_y: float, accel_z: float) -> float:
