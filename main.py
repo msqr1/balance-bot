@@ -24,13 +24,16 @@ from constants import (
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
 from independent_ema import IndependentEMA
+from kalman_filter import KalmanFilter
 from pid_controller import PIDController
 
 i2c = board.I2C()
 
+digital_filter = KalmanFilter()
+
 mpu = FilteredMPU6050(
     i2c,
-    ComplementaryFilter(complementary_filter_weight),
+    digital_filter,
     filter_bandwidth=Bandwidth.BAND_21_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),
