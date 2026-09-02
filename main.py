@@ -60,7 +60,9 @@ pid = PIDController(kp, ki, kd, ks, pid_tau, setpoint=setpoint)
 
 
 def main() -> None:
-    get_time = lambda: current_time - start_time
+    def get_time() -> float:
+        return current_time - start_time
+
     grouped_loggers = {
         "core": (
             get_time,
@@ -85,9 +87,7 @@ def main() -> None:
             lambda: acceleration[2],
         ),
     }
-    start_time = monotonic()
-    last_time = monotonic()
-    last_print = monotonic()
+    start_time = last_time = last_print = monotonic()
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     velocity = 0.0
@@ -114,7 +114,7 @@ def main() -> None:
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
         if abs(pitch) > abort_angle:
-            print("Robot fell. Aborting.")
+            print(f"Robot fell at {get_time():.3f}s. Aborting.")
             motor_r.stop()
             motor_l.stop()
             break
