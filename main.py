@@ -4,6 +4,7 @@ from time import monotonic
 
 import board
 
+from complementary_filter import ComplementaryFilter
 from constants import (
     abort_angle,
     complementary_filter_weight,
@@ -29,7 +30,7 @@ i2c = board.I2C()
 
 mpu = FilteredMPU6050(
     i2c,
-    filter_weight=complementary_filter_weight,
+    ComplementaryFilter(complementary_filter_weight),
     filter_bandwidth=Bandwidth.BAND_21_HZ,
     axes=(2, 0, 1),
     signs=(-1, 1, -1),

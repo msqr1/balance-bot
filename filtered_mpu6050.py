@@ -1,18 +1,23 @@
 from math import atan2, hypot
+from typing import Protocol
 
 from adafruit_mpu6050 import _MPU6050_DEFAULT_ADDRESS, MPU6050, STANDARD_GRAVITY
 from adafruit_mpu6050 import Bandwidth as Bandwidth  # noqa: PLC0414
 from busio import I2C
 
-from complementary_filter import ComplementaryFilter
+
+class DigitalFilter(Protocol):
+    angle: float
+
+    def update(self, dt: float, angle: float, rate: float, /) -> float: ...
 
 
 class FilteredMPU6050(MPU6050):
     def __init__(
         self,
         i2c_bus: I2C,
+        digital_filter: DigitalFilter,
         address: int = _MPU6050_DEFAULT_ADDRESS,
-        filter_weight: float = 0.95,
         filter_bandwidth: int = Bandwidth.BAND_260_HZ,
         axes: tuple[int, int, int] = (0, 1, 2),
         signs: tuple[int, int, int] = (1, 1, 1),
@@ -31,12 +36,12 @@ class FilteredMPU6050(MPU6050):
         if len(signs) != 3 or not set(signs) <= {-1, 1}:
             raise ValueError(signs)
         self.signs = signs
-        self.complementary_filter = ComplementaryFilter(filter_weight)
+        self.digital_filter = digital_filter
         try:
             self._oriented_acceleration = self._get_oriented_acceleration()
         except OSError:
             self._oriented_acceleration = 0.0, 0.0, 0.0
-        self._oriented_pitch = self.complementary_filter.last_angle = (
+        self._oriented_pitch = self.digital_filter.angle = (
             self.oriented_acceleration_pitch
         )
 
@@ -68,7 +73,7 @@ class FilteredMPU6050(MPU6050):
             oriented_acceleration_pitch = self.oriented_acceleration_pitch
         except OSError:
             return
-        self._oriented_pitch = self.complementary_filter.update(
+        self._oriented_pitch = self.digital_filter.update(
             dt, oriented_acceleration_pitch, pitch_angular_velocity
         )
 
