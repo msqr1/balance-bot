@@ -13,6 +13,7 @@ from constants import (
     ki,
     kp,
     ks,
+    kv,
     left_multiplier,
     pid_tau,
     pitch_rate_tau,
@@ -117,7 +118,7 @@ def main() -> None:
             motor_r.stop()
             motor_l.stop()
             break
-        speed = -pid.calculate(dt, pitch, pitch_rate)
+        speed = -(pid.calculate(dt, pitch, pitch_rate) - kv * velocity)
         clamped_speed = enable_motors * min(max(speed_ema.update(dt, speed), -1.0), 1.0)
         motor_r.move(clamped_speed * right_multiplier)
         motor_l.move(clamped_speed * left_multiplier)

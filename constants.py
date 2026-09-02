@@ -2,6 +2,7 @@ kp = 0.35
 ki = 0.20
 kd = 0.005
 ks = 0.10
+kv = 0.0
 pid_tau = 0.00
 pitch_rate_tau = 0.015
 speed_tau = 0.00
