@@ -45,13 +45,13 @@ mpu = FilteredMPU6050(
 
 
 motor_r = HBridgeMotor(  # Motor A
-    in1=25,
-    in2=18,
-    pwm=23,
+    in1=16,
+    in2=20,
+    pwm=21,
 )
 motor_l = HBridgeMotor(  # Motor B
     in1=12,
-    in2=16,
+    in2=25,
     pwm=24,
 )
 
