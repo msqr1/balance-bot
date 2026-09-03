@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Callable
-from math import atan, cos, degrees, hypot, sin
+from math import atan, degrees
 from pathlib import Path
 from time import monotonic
 
@@ -17,7 +17,6 @@ from constants import (
     kp,
     ks,
     kv,
-    kv_tau,
     left_multiplier,
     pid_tau,
     pitch_rate_tau,
@@ -26,6 +25,7 @@ from constants import (
     speed_tau,
     tick_rate,
     velocity_correction,
+    velocity_tau,
 )
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
@@ -90,7 +90,7 @@ def main() -> None:
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     clamped_speed = speed = 0.0
-    velocity_ema = IndependentEMA(kv_tau)
+    velocity_ema = IndependentEMA(velocity_tau)
     start_time = last_time = last_print = monotonic()
     while True:
         current_time = monotonic()
