@@ -51,14 +51,14 @@ mpu = FilteredMPU6050(
 
 
 motor_r = HBridgeMotor(  # Motor A
-    in1=16,
-    in2=20,
-    pwm=21,
+    in1=13,
+    in2=19,
+    pwm=26,
 )
 motor_l = HBridgeMotor(  # Motor B
-    in1=12,
-    in2=25,
-    pwm=24,
+    in1=21,
+    in2=20,
+    pwm=16,
 )
 
 pid = PIDController(kp, ki, kd, ks, pid_tau, setpoint=setpoint)
