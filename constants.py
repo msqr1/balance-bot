@@ -1,14 +1,14 @@
 kp = 0.60
 ki = 0.00
-kd = 0.00
+kd = 0.006
 ks = 0.0
-kv = 0.0
+kv = 0.2
 pid_tau = 0.00
 pitch_rate_tau = 0.010
 speed_tau = 0.00
 velocity_correction = 0.00
 
-setpoint = -3.00
+setpoint = -4.80
 
 tick_rate = 200.0
 
