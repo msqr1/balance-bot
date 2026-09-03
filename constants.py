@@ -15,6 +15,7 @@ velocity_correction = 0.10  # for m/s
 distance_tau = 0.50
 distance_correction = 0.10  # for centimeters
 distance_setpoint = 20.0  # centimeters
+distance_max_error = 20.0
 
 ping_interval = 0.060
 

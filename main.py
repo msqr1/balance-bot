@@ -9,6 +9,7 @@ import board
 from constants import (
     abort_angle,
     distance_correction,
+    distance_max_error,
     distance_setpoint,
     distance_tau,
     enable_motors,
@@ -134,7 +135,9 @@ def main() -> None:
             if raw_distance is not None
             else distance_ema.value
         )
-        distance_error = distance_setpoint - distance
+        distance_error = min(
+            max(distance_setpoint - distance, distance_max_error), -distance_max_error
+        )
 
         pid.setpoint = setpoint - degrees(
             atan(velocity * velocity_correction + distance_error * distance_correction)
