@@ -1,3 +1,5 @@
+setpoint = -5.20
+
 kp = 0.50
 ki = 0.00
 kd = 0.006
@@ -6,10 +8,15 @@ kv = 0.8
 pid_tau = 0.00
 pitch_rate_tau = 0.010
 speed_tau = 0.00
-velocity_tau = 0.50
-velocity_correction = 0.10
 
-setpoint = -5.20
+velocity_tau = 0.50
+velocity_correction = 0.10  # for m/s
+
+distance_tau = 0.50
+distance_correction = 0.10  # for centimeters
+distance_setpoint = 20.0  # centimeters
+
+ping_interval = 0.060
 
 tick_rate = 200.0
 

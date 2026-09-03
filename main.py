@@ -8,6 +8,9 @@ import board
 
 from constants import (
     abort_angle,
+    distance_correction,
+    distance_setpoint,
+    distance_tau,
     enable_motors,
     kalman_q_angle,
     kalman_q_bias,
@@ -19,6 +22,7 @@ from constants import (
     kv,
     left_multiplier,
     pid_tau,
+    ping_interval,
     pitch_rate_tau,
     right_multiplier,
     setpoint,
@@ -92,12 +96,21 @@ def main() -> None:
             # lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
             lambda: -kv * velocity,  # kv
         ),
+        "setpoint": (
+            get_time,
+            lambda: pid.setpoint,  # Setpoint
+            lambda: -velocity * velocity_correction,  # Velocity correction
+            lambda: -distance * distance_correction,  # Distance correction
+        ),
     }
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     clamped_speed = speed = 0.0
     velocity_ema = IndependentEMA(velocity_tau)
-    start_time = last_time = last_print = monotonic()
+
+    distance_ema = IndependentEMA(distance_tau, distance_setpoint)
+
+    start_time = last_time = last_print = last_ping = monotonic()
     while True:
         current_time = monotonic()
         dt = current_time - last_time
@@ -109,7 +122,23 @@ def main() -> None:
         mpu.update(dt)
         pitch_rad = mpu.oriented_pitch
         velocity = velocity_ema.update(dt, speed)
-        pid.setpoint = setpoint - degrees(atan(velocity * velocity_correction))
+
+        if current_time - last_ping >= ping_interval:
+            sonar.trigger()
+            last_ping = current_time
+        sonar.update()
+
+        raw_distance = sonar.distance_cm
+        distance = (
+            distance_ema.update(dt, raw_distance)
+            if raw_distance is not None
+            else distance_ema.value
+        )
+        distance_error = distance_setpoint - distance
+
+        pid.setpoint = setpoint - degrees(
+            atan(velocity * velocity_correction + distance_error * distance_correction)
+        )
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
         if abs(pitch) > abort_angle:
