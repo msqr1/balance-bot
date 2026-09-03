@@ -1,4 +1,4 @@
-setpoint = -5.20
+setpoint = -5.40
 
 kp = 0.50
 ki = 0.00
@@ -12,9 +12,9 @@ speed_tau = 0.00
 velocity_tau = 0.50
 velocity_correction = 0.10  # for m/s
 
-distance_tau = 0.50
-distance_correction = 0.10  # for centimeters
-distance_setpoint = 20.0  # centimeters
+distance_tau = 1.00
+distance_correction = 0.003  # for centimeters
+distance_setpoint = 40.0  # centimeters
 distance_max_error = 20.0
 
 ping_interval = 0.060
@@ -29,7 +29,7 @@ kalman_r_measure = 5.0
 
 # complementary_filter_weight = 0.98
 
-left_multiplier = 0.87
+left_multiplier = 0.90
 right_multiplier = 1.0
 
 enable_motors = True
