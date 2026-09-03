@@ -31,7 +31,7 @@ from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
 from independent_ema import IndependentEMA
 from kalman_filter import KalmanFilter
-from pid_controller import PIDController, sign
+from pid_controller import PIDController
 
 i2c = board.I2C()
 
@@ -94,19 +94,19 @@ def main() -> None:
             lambda: acceleration[2],
         ),
     }
-    start_time = last_time = last_print = monotonic()
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     velocity = 0.0
     clamped_speed = speed = 0.0
     kv_ema = IndependentEMA(kv_tau)
+    start_time = last_time = last_print = monotonic()
     while True:
         current_time = monotonic()
         dt = current_time - last_time
         if dt < 1.0 / tick_rate:
             continue
-        if dt > 2.0 / tick_rate:
-            print(f"LAG: {dt:.4f}")
+        if dt > 1.5 / tick_rate:
+            print(f"LAG at {get_time():.4f}s: {dt:.4f} ({dt * tick_rate - 1.0:+.0%})")
         last_time = current_time
         mpu.update(dt)
         pitch_rad = mpu.oriented_pitch
