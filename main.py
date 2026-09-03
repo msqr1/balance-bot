@@ -17,6 +17,7 @@ from constants import (
     kp,
     ks,
     kv,
+    kv_tau,
     left_multiplier,
     pid_tau,
     pitch_rate_tau,
@@ -82,8 +83,8 @@ def main() -> None:
             lambda: (pid.setpoint - pid.value_ema.value) * kp,  # kp
             lambda: pid.error_integral * ki,  # ki
             lambda: pitch_rate * kd,  # kd
-            lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
-            # lambda: -kv * velocity,  # kv
+            # lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
+            lambda: -kv * kv_ema.value,  # kv
         ),
         "acceleration": (
             get_time,
@@ -97,6 +98,8 @@ def main() -> None:
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
     velocity = 0.0
+    clamped_speed = speed = 0.0
+    kv_ema = IndependentEMA(kv_tau)
     while True:
         current_time = monotonic()
         dt = current_time - last_time
@@ -124,7 +127,8 @@ def main() -> None:
             motor_r.stop()
             motor_l.stop()
             break
-        speed = -(pid.calculate(dt, pitch, pitch_rate) - kv * velocity)
+        speed = -(pid.calculate(dt, pitch, pitch_rate) - kv * kv_ema.update(dt, speed))
+
         clamped_speed = enable_motors * min(max(speed_ema.update(dt, speed), -1.0), 1.0)
         motor_r.move(clamped_speed * right_multiplier)
         motor_l.move(clamped_speed * left_multiplier)

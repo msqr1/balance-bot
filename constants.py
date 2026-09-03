@@ -6,6 +6,7 @@ kv = 0.2
 pid_tau = 0.00
 pitch_rate_tau = 0.010
 speed_tau = 0.00
+kv_tau = 0.020
 velocity_correction = 0.00
 
 setpoint = -4.80
