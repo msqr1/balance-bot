@@ -84,21 +84,13 @@ def main() -> None:
             lambda: pid.error_integral * ki,  # ki
             lambda: pitch_rate * kd,  # kd
             # lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
-            lambda: -kv * kv_ema.value,  # kv
-        ),
-        "acceleration": (
-            get_time,
-            lambda: velocity,
-            lambda: acceleration[0],
-            lambda: acceleration[1],
-            lambda: acceleration[2],
+            lambda: -kv * velocity,  # kv
         ),
     }
     speed_ema = IndependentEMA(speed_tau)
     pitch_rate_ema = IndependentEMA(pitch_rate_tau)
-    velocity = 0.0
     clamped_speed = speed = 0.0
-    kv_ema = IndependentEMA(kv_tau)
+    velocity_ema = IndependentEMA(kv_tau)
     start_time = last_time = last_print = monotonic()
     while True:
         current_time = monotonic()
@@ -110,15 +102,7 @@ def main() -> None:
         last_time = current_time
         mpu.update(dt)
         pitch_rad = mpu.oriented_pitch
-        try:
-            acceleration = mpu.oriented_acceleration
-        except OSError:
-            acceleration = 0.0, 0.0, 0.0
-        else:
-            acceleration_linear = acceleration[0] * cos(pitch_rad) + hypot(
-                0.0 * acceleration[1], acceleration[2]
-            ) * sin(pitch_rad)
-            velocity += acceleration_linear * dt
+        velocity = velocity_ema.update(dt, speed)
         pid.setpoint = setpoint - degrees(atan(velocity * velocity_correction))
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
@@ -127,8 +111,7 @@ def main() -> None:
             motor_r.stop()
             motor_l.stop()
             break
-        speed = -(pid.calculate(dt, pitch, pitch_rate) - kv * kv_ema.update(dt, speed))
-
+        speed = -(pid.calculate(dt, pitch, pitch_rate) - kv * velocity)
         clamped_speed = enable_motors * min(max(speed_ema.update(dt, speed), -1.0), 1.0)
         motor_r.move(clamped_speed * right_multiplier)
         motor_l.move(clamped_speed * left_multiplier)
