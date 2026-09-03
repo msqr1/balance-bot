@@ -136,7 +136,7 @@ def main() -> None:
             else distance_ema.value
         )
         distance_error = min(
-            max(distance_setpoint - distance, distance_max_error), -distance_max_error
+            max(distance_setpoint - distance, -distance_max_error), distance_max_error
         )
 
         pid.setpoint = setpoint - degrees(
