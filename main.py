@@ -153,6 +153,9 @@ def main() -> None:
         if current_time - last_print > 0.2:
             # print(f"Pitch (deg): {pitch:.2f}")
             # print(mpu)
+            print(
+                f"Setpoint: {pid.setpoint:.3f}, Distance error: {distance_error:.2f} cm"
+            )
             last_print = current_time
         for group, loggers in grouped_loggers.items():
             logged_values[group].append(tuple(logger() for logger in loggers))
