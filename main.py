@@ -140,7 +140,7 @@ def main() -> None:
         )
 
         pid.setpoint = setpoint - degrees(
-            atan(velocity * velocity_correction + distance_error * distance_correction)
+            atan(velocity * velocity_correction - distance_error * distance_correction)
         )
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
