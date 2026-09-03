@@ -1,4 +1,5 @@
 from collections import defaultdict
+from collections.abc import Callable
 from math import atan, cos, degrees, hypot, sin
 from pathlib import Path
 from time import monotonic
@@ -67,7 +68,7 @@ def main() -> None:
     def get_time() -> float:
         return current_time - start_time
 
-    grouped_loggers = {
+    grouped_loggers: dict[str, Callable[[], float]] = {
         "core": (
             get_time,
             lambda: pitch,  # Pitch
