@@ -8,6 +8,8 @@ import board
 from constants import (
     abort_angle,
     enable_motors,
+    kalman_q_angle,
+    kalman_q_bias,
     kalman_r_measure,
     kd,
     ki,
@@ -31,7 +33,9 @@ from pid_controller import PIDController, sign
 
 i2c = board.I2C()
 
-digital_filter = KalmanFilter(R_measure=kalman_r_measure)
+digital_filter = KalmanFilter(
+    Q_angle=kalman_q_angle, Q_bias=kalman_q_bias, R_measure=kalman_r_measure
+)
 
 mpu = FilteredMPU6050(
     i2c,

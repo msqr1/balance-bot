@@ -15,6 +15,8 @@ tick_rate = 100.0
 abort_angle = 45.0
 
 kalman_r_measure = 0.03
+kalman_q_angle = 0.0001
+kalman_q_bias = 0.003
 
 # complementary_filter_weight = 0.98
 

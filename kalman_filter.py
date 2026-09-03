@@ -4,10 +4,17 @@ from filtered_mpu6050 import DigitalFilter
 class KalmanFilter(DigitalFilter):
     """Kalman filter implementation via Google Gemini."""
 
-    def __init__(self, *, angle: float = 0.0, R_measure: float = 0.03) -> None:
+    def __init__(
+        self,
+        *,
+        angle: float = 0.0,
+        Q_angle: float = 0.001,
+        Q_bias: float = 0.003,
+        R_measure: float = 0.03,
+    ) -> None:
         # Filter tuning parameters (Covariances)
-        self.Q_angle = 0.001  # Process noise variance for the accelerometer
-        self.Q_bias = 0.003  # Process noise variance for the gyro bias
+        self.Q_angle = Q_angle  # Process noise variance for the accelerometer
+        self.Q_bias = Q_bias  # Process noise variance for the gyro bias
         self.R_measure = R_measure  # Measurement noise variance
 
         self.angle = angle  # Reset estimated angle
