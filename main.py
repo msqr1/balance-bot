@@ -5,6 +5,7 @@ from pathlib import Path
 from time import monotonic
 
 import board
+from adafruit_hcsr04 import HCSR04
 
 from constants import (
     abort_angle,
@@ -49,6 +50,8 @@ mpu = FilteredMPU6050(
     calibrated_scales=(1.0012, 0.9939, 0.9802),
     calibrated_gyro_offsets=(-0.050926, 0.021809, 0.007153),
 )
+
+sonar = HCSR04(trigger_pin=board.D6, echo_pin=board.D5)
 
 
 motor_r = HBridgeMotor(  # Motor A
