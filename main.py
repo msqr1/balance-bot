@@ -5,7 +5,6 @@ from pathlib import Path
 from time import monotonic
 
 import board
-from adafruit_hcsr04 import HCSR04
 
 from constants import (
     abort_angle,
@@ -30,6 +29,7 @@ from constants import (
 )
 from filtered_mpu6050 import Bandwidth, FilteredMPU6050
 from h_bridge_motor import HBridgeMotor
+from hcsr04 import NonblockingHCSR04
 from independent_ema import IndependentEMA
 from kalman_filter import KalmanFilter
 from pid_controller import PIDController
@@ -51,7 +51,10 @@ mpu = FilteredMPU6050(
     calibrated_gyro_offsets=(-0.050926, 0.021809, 0.007153),
 )
 
-sonar = HCSR04(trigger_pin=board.D6, echo_pin=board.D5)
+sonar = NonblockingHCSR04(
+    trigger_pin=board.D6,  # type: ignore[attr-defined]
+    echo_pin=board.D5,  # type: ignore[attr-defined]
+)
 
 
 motor_r = HBridgeMotor(  # Motor A
