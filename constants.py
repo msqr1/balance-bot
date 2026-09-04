@@ -32,4 +32,12 @@ kalman_r_measure = 5.0
 left_multiplier = 0.90
 right_multiplier = 1.0
 
+mpu_axes = 2, 0, 1
+mpu_signs = -1, 1, -1
+
+# Generated via calibrate_acceleration, calibrate_gyro
+calibrated_centers = 0.4767, -0.0322, 0.1800
+calibrated_scales = 1.0012, 0.9939, 0.9802
+calibrated_gyro_offsets = -0.050926, 0.021809, 0.007153
+
 enable_motors = True

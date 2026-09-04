@@ -8,6 +8,9 @@ import board
 
 from constants import (
     abort_angle,
+    calibrated_centers,
+    calibrated_gyro_offsets,
+    calibrated_scales,
     distance_correction,
     distance_max_error,
     distance_setpoint,
@@ -22,6 +25,8 @@ from constants import (
     ks,
     kv,
     left_multiplier,
+    mpu_axes,
+    mpu_signs,
     pid_tau,
     ping_interval,
     pitch_rate_tau,
@@ -49,11 +54,11 @@ mpu = FilteredMPU6050(
     i2c,
     digital_filter,
     filter_bandwidth=Bandwidth.BAND_21_HZ,
-    axes=(2, 0, 1),
-    signs=(-1, 1, -1),
-    calibrated_centers=(0.4767, -0.0322, 0.1800),
-    calibrated_scales=(1.0012, 0.9939, 0.9802),
-    calibrated_gyro_offsets=(-0.050926, 0.021809, 0.007153),
+    axes=mpu_axes,
+    signs=mpu_signs,
+    calibrated_centers=calibrated_centers,
+    calibrated_scales=calibrated_scales,
+    calibrated_gyro_offsets=calibrated_gyro_offsets,
 )
 
 sonar = NonblockingHCSR04(
