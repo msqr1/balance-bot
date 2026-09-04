@@ -80,7 +80,7 @@ def main() -> None:
     def get_time() -> float:
         return current_time - start_time
 
-    grouped_loggers: dict[str, Callable[[], float]] = {
+    grouped_loggers: dict[str, tuple[Callable[[], float], ...]] = {
         "core": (
             get_time,
             lambda: pitch,  # Pitch
