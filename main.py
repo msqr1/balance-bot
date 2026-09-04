@@ -43,7 +43,7 @@ from h_bridge_motor import HBridgeMotor
 from hcsr04 import NonblockingHCSR04
 from independent_ema import IndependentEMA
 from kalman_filter import KalmanFilter
-from pid_controller import PIDController
+from pid_controller import PIDController, sign
 
 i2c = board.I2C()
 
@@ -97,17 +97,17 @@ def main() -> None:
         "contribution": (
             get_time,
             lambda: -speed,  # Speed was inverted after calculating it from gains
-            lambda: (pid.setpoint - pid.value_ema.value) * kp,  # kp
-            lambda: pid.error_integral * ki,  # ki
-            lambda: pitch_rate * kd,  # kd
-            # lambda: sign(pid.setpoint - pid.value_ema.value) * ks,  # ks
-            lambda: -kv * velocity,  # kv
+            lambda: kp * (pid.setpoint - pid.value_ema.value),  # kp
+            # lambda: ki * pid.error_integral,  # ki
+            lambda: kd * pitch_rate,  # kd
+            lambda: ks * sign(pid.setpoint - pid.value_ema.value),  # ks
+            lambda: kv * -velocity,  # kv
         ),
         "setpoint": (
             get_time,
             lambda: pid.setpoint,  # Setpoint
-            lambda: -velocity * velocity_correction,  # Velocity correction
-            lambda: -distance * distance_correction,  # Distance correction
+            lambda: velocity_correction * -velocity,  # Velocity correction
+            lambda: distance_correction * -distance,  # Distance correction
         ),
     }
     speed_ema = IndependentEMA(speed_tau)
@@ -146,7 +146,7 @@ def main() -> None:
         )
 
         pid.setpoint = setpoint - degrees(
-            atan(velocity * velocity_correction - distance_error * distance_correction)
+            atan(velocity_correction * velocity - distance_correction * distance_error)
         )
         pitch = degrees(pitch_rad)
         pitch_rate = pitch_rate_ema.update(dt, degrees(mpu.oriented_gyro[1]))
