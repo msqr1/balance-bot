@@ -29,7 +29,7 @@ kalman_r_measure = 5.0
 
 # complementary_filter_weight = 0.98
 
-left_multiplier = 0.90
+left_multiplier = 0.89
 right_multiplier = 1.0
 
 mpu_axes = 2, 0, 1
