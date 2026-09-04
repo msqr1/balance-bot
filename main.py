@@ -15,6 +15,7 @@ from constants import (
     distance_max_error,
     distance_setpoint,
     distance_tau,
+    enable_logging,
     enable_motors,
     kalman_q_angle,
     kalman_q_bias,
@@ -167,8 +168,9 @@ def main() -> None:
                 f", Filtered distance: {distance:.2f} cm"
             )
             last_print = current_time
-        for group, loggers in grouped_loggers.items():
-            logged_values[group].append(tuple(logger() for logger in loggers))
+        if enable_logging:
+            for group, loggers in grouped_loggers.items():
+                logged_values[group].append(tuple(logger() for logger in loggers))
 
 
 logs_directory = Path(".logs")
@@ -181,8 +183,10 @@ if __name__ == "__main__":
     try:
         main()
     finally:
-        for group, values in logged_values.items():
-            with (logs_directory / f"{group}.txt").open("w") as log_file:
-                log_file.writelines(
-                    ",".join(f"{value:.10f}" for value in row) + "\n" for row in values
-                )
+        if enable_logging:
+            for group, values in logged_values.items():
+                with (logs_directory / f"{group}.txt").open("w") as log_file:
+                    log_file.writelines(
+                        ",".join(f"{value:.10f}" for value in row) + "\n"
+                        for row in values
+                    )

@@ -41,3 +41,4 @@ calibrated_scales = 1.0012, 0.9939, 0.9802
 calibrated_gyro_offsets = -0.050926, 0.021809, 0.007153
 
 enable_motors = True
+enable_logging = True
