@@ -162,11 +162,11 @@ def main() -> None:
         if current_time - last_print > 0.2:
             # print(f"Pitch (deg): {pitch:.2f}")
             # print(mpu)
-            print(
-                f"Setpoint: {pid.setpoint:.3f}, Distance error: {distance_error:.2f} cm"
-                f", Raw distance: {-1.0 if raw_distance is None else raw_distance} cm"
-                f", Filtered distance: {distance:.2f} cm"
-            )
+            # print(
+            #     f"Setpoint: {pid.setpoint:.3f}, Distance error: {distance_error:.2f} cm"
+            #     f", Raw distance: {-1.0 if raw_distance is None else raw_distance} cm"
+            #     f", Filtered distance: {distance:.2f} cm"
+            # )
             last_print = current_time
         if enable_logging:
             for group, loggers in grouped_loggers.items():
