@@ -141,28 +141,28 @@ Raw IMU data exhibits zero-rate offset bias and sensitivity scale inaccuracies d
 #### 1. Gyroscope Zero-Rate Bias Calibration ([`calibrate_gyro.py`](calibrate_gyro.py))
 When stationary, an ideal gyroscope measures $0\text{ rad/s}$. The calibration routine records $N = 1000$ samples over $10\text{ seconds}$ at rest and computes the bias vector:
 
-$$\mathbf{b}_{\text{gyro}} = \frac{1}{N} \sum_{k=1}^{N} \boldsymbol{\omega}_k$$
+$`\mathbf{b}_{\text{gyro}} = \frac{1}{N} \sum_{k=1}^{N} \boldsymbol{\omega}_k`$
 
 In the control loop, calibrated angular velocity is obtained via zero-offset subtraction:
 
-$$\boldsymbol{\omega}_{\text{cal}} = \boldsymbol{\omega}_{\text{raw}} - \mathbf{b}_{\text{gyro}}$$
+$`\boldsymbol{\omega}_{\text{cal}} = \boldsymbol{\omega}_{\text{raw}} - \mathbf{b}_{\text{gyro}}`$
 
 #### 2. Accelerometer 6-Orientation Multi-Pose Calibration ([`calibrate_acceleration.py`](calibrate_acceleration.py))
 To calibrate both sensitivity scaling and zero-offsets across all 3 axes, an interactive 6-pose routine positions each axis parallel and antiparallel to Earth's gravity vector ($\pm 1g$):
 
-1. **Span Midpoint**: Computes center point from extreme peak measurements:
-   $$\text{center}_{\text{span}} = \frac{v_{\max} + v_{\min}}{2}$$
-2. **Orthogonal Zero Averaging**: Computes the mean of the 4 independent perpendicular poses where gravity along that axis should be zero:
-   $$\text{center}_{\text{ortho}} = \frac{1}{4} \sum_{j=1}^{4} v_{\text{zero}, j}$$
-3. **Refined Bias & Scale Factor**: Combines both metrics to isolate cross-axis coupling:
-   $$\text{center} = 0.5 \cdot \text{center}_{\text{span}} + 0.5 \cdot \text{center}_{\text{ortho}}$$
-   $$\text{scale} = \frac{2g}{v_{\max} - v_{\min}} \quad \text{where } g = 9.80665\text{ m/s}^2$$
+1. **Span Midpoint**: Computes center point from extreme peak measurements: \
+   $`\text{center}_{\text{span}} = \frac{v_{\max} + v_{\min}}{2}`$
+2. **Orthogonal Zero Averaging**: Computes the mean of the 4 independent perpendicular poses where gravity along that axis should be zero: \
+   $`\text{center}_{\text{ortho}} = \frac{1}{4} \sum_{j=1}^{4} v_{\text{zero}, j}`$
+3. **Refined Bias & Scale Factor**: Combines both metrics to isolate cross-axis coupling: \
+   $`\text{center} = 0.5 \cdot \text{center}_{\text{span}} + 0.5 \cdot \text{center}_{\text{ortho}}`$ \
+   $`\text{scale} = \frac{2g}{v_{\max} - v_{\min}} \quad \text{where } g = 9.80665\text{ m/s}^2`$
 
 (Note that the weighted average for the center can be changed if one measure is deemed more accurate. In the actual configuration, only the ortho center measure was used.)
 
 During runtime, raw acceleration readings are calibrated via:
 
-$$\mathbf{a}_{\text{cal}} = (\mathbf{a}_{\text{raw}} - \text{center}) \odot \text{scale}$$
+$`\mathbf{a}_{\text{cal}} = (\mathbf{a}_{\text{raw}} - \text{center}) \odot \text{scale}`$
 
 ---
 
@@ -172,9 +172,9 @@ Standard discrete low-pass filters take the form $y_k = (1 - \alpha) y_{k-1} + \
 
 To decouple filter responsiveness from loop frequency, the [`IndependentEMA`](independent_ema.py) module parameterizes smoothing using a continuous physical time constant $\tau$ (the duration required to reach $\approx 63.2\%$ of a step input):
 
-$$\alpha(\Delta t) = 1 - e^{-\frac{\Delta t}{\tau}}$$
+$`\alpha(\Delta t) = 1 - e^{-\frac{\Delta t}{\tau}}`$
 
-$$y_k = y_{k-1} + \alpha(\Delta t) \cdot (x_k - y_{k-1})$$
+$`y_k = y_{k-1} + \alpha(\Delta t) \cdot (x_k - y_{k-1})`$
 
 This formulation ensures identical temporal response regardless of whether loop iterations take $5.0\text{ ms}$ or $25.0\text{ ms}$.
 
@@ -183,19 +183,19 @@ This formulation ensures identical temporal response regardless of whether loop 
 ### State Estimation: Kalman Filter vs. Complementary Filter
 
 Pitch can be measured through two independent sensor sources:
-1. **Accelerometer Pitch**: Provides an absolute gravity reference by measuring the gravitational projection:
-   $$\theta_{\text{acc}} = \text{atan2}\left(-a_x, \sqrt{a_y^2 + a_z^2}\right)$$
+1. **Accelerometer Pitch**: Provides an absolute gravity reference by measuring the gravitational projection: \
+   $`\theta_{\text{acc}} = \text{atan2}\left(-a_x, \sqrt{a_y^2 + a_z^2}\right)`$
    - *Strengths*: Absolute reference with zero long-term drift.
    - *Limitations*: Susceptible to mechanical motor vibration and linear chassis acceleration.
-2. **Gyroscope Pitch Rate**: Measures angular rate $\omega_y$:
-   $$\theta_{\text{gyro}}(t) = \int_0^t \omega_y(\tau) \, d\tau$$
+2. **Gyroscope Pitch Rate**: Measures angular rate $\omega_y$: \
+   $`\theta_{\text{gyro}}(t) = \int_0^t \omega_y(\tau) \, d\tau`$
    - *Strengths*: High-bandwidth response, completely immune to linear acceleration shocks.
    - *Limitations*: Numerical integration accumulates bias over time, resulting in unbounded angular drift.
 
 #### Complementary Filter Baseline ([`complementary_filter.py`](complementary_filter.py))
 Combines high-pass filtered gyro integration with low-pass filtered accelerometer pitch:
 
-$$\theta_k = \gamma \left(\theta_{k-1} + \omega_y \Delta t\right) + (1 - \gamma) \theta_{\text{acc}}$$
+$`\theta_k = \gamma \left(\theta_{k-1} + \omega_y \Delta t\right) + (1 - \gamma) \theta_{\text{acc}}`$
 
 While effective with $\gamma \approx 0.98$, it lacks a dynamic model of uncertainty and fails to reject non-gravitational linear accelerations during aggressive motor reversals.
 
@@ -204,24 +204,24 @@ The complementary filter was dropped during development in favor of a Kalman fil
 #### 2-State Discrete Kalman Filter ([`kalman_filter.py`](kalman_filter.py))
 The project deploys a continuous-discrete linear Kalman filter estimating both the tilt angle $\theta$ and the uncalibrated gyro bias $b$:
 
-$$\mathbf{x} = \begin{bmatrix} \theta \\ b \end{bmatrix}, \quad \dot{\theta} = \omega - b$$
+$`\mathbf{x} = \begin{bmatrix} \theta \\ b \end{bmatrix}, \quad \dot{\theta} = \omega - b`$
 
 ##### 1. State & Covariance Prediction
-$$\hat{\theta}_{k|k-1} = \hat{\theta}_{k-1|k-1} + \Delta t (\omega_k - \hat{b}_{k-1|k-1})$$
-$$\hat{b}_{k|k-1} = \hat{b}_{k-1|k-1}$$
+$`\hat{\theta}_{k|k-1} = \hat{\theta}_{k-1|k-1} + \Delta t (\omega_k - \hat{b}_{k-1|k-1})`$ \
+$`\hat{b}_{k|k-1} = \hat{b}_{k-1|k-1}`$
 
-The error covariance $\mathbf{P}$ is propagated using process noise variances $Q_{\text{angle}}$ and $Q_{\text{bias}}$:
-$$\mathbf{P}_{k|k-1} = \mathbf{F} \mathbf{P}_{k-1|k-1} \mathbf{F}^T + \mathbf{Q} \Delta t$$
+The error covariance $\mathbf{P}$ is propagated using process noise variances $Q_{\text{angle}}$ and $Q_{\text{bias}}$: \
+$`\mathbf{P}_{k|k-1} = \mathbf{F} \mathbf{P}_{k-1|k-1} \mathbf{F}^T + \mathbf{Q} \Delta t`$
 
 ##### 2. Innovation & Kalman Gain
-With observation matrix $\mathbf{H} = \begin{bmatrix} 1 & 0 \end{bmatrix}$ and measurement covariance $R_{\text{measure}}$:
-$$S = P_{00} + R_{\text{measure}}$$
-$$\mathbf{K} = \begin{bmatrix} P_{00} / S \\ P_{10} / S \end{bmatrix}$$
+With observation matrix $\mathbf{H} = \begin{bmatrix} 1 & 0 \end{bmatrix}$ and measurement covariance $R_{\text{measure}}$: \
+$`S = P_{00} + R_{\text{measure}}`$ \
+$`\mathbf{K} = \begin{bmatrix} P_{00} / S \\ P_{10} / S \end{bmatrix}`$
 
 ##### 3. Measurement Update
-$$y_k = \theta_{\text{acc}} - \hat{\theta}_{k|k-1}$$
-$$\hat{\mathbf{x}}_{k|k} = \hat{\mathbf{x}}_{k|k-1} + \mathbf{K} y_k$$
-$$\mathbf{P}_{k|k} = (\mathbf{I} - \mathbf{K}\mathbf{H}) \mathbf{P}_{k|k-1}$$
+$`y_k = \theta_{\text{acc}} - \hat{\theta}_{k|k-1}`$ \
+$`\hat{\mathbf{x}}_{k|k} = \hat{\mathbf{x}}_{k|k-1} + \mathbf{K} y_k`$ \
+$`\mathbf{P}_{k|k} = (\mathbf{I} - \mathbf{K}\mathbf{H}) \mathbf{P}_{k|k-1}`$
 
 **Tuned Parameters** ([`constants.py`](constants.py)):
 * $Q_{\text{angle}} = 0.0001$ (accelerometer process noise variance)
@@ -238,7 +238,7 @@ The primary factor is the ratio between $Q_{\text{angle}}$ and $R_{\text{measure
 
 The feedback controller ([`pid_controller.py`](pid_controller.py)) computes the motor speed demand based on error $e = \theta_{\text{setpoint}} - \theta_{\text{filtered}}$:
 
-$$\text{Speed} = -\left( K_p e + K_i \int e \, dt - K_d \frac{d\theta}{dt} + K_s \cdot \text{sgn}(e) - K_v v \right)$$
+$`\text{Speed} = -\left( K_p e + K_i \int e \, dt - K_d \frac{d\theta}{dt} + K_s \cdot \text{sgn}(e) - K_v v \right)`$
 
 ```
                                   +-------------------+
@@ -270,12 +270,12 @@ Velocity (EMA)     +------------> |  Kv * Velocity    | ---+
 A classic problem with two-wheeled robots lacking optical wheel encoders is **velocity runaway**. If the robot leans forward slightly to counteract a disturbance, it must travel forward. As forward linear velocity increases, back-EMF reduces available motor acceleration torque until the motors saturate, causing the robot to fall.
 
 To solve this without encoders:
-1. **Throttle as Velocity Observer**: Over short durations, motor command represents chassis acceleration; over longer windows, average motor throttle serves as a reliable proxy for linear velocity:
+1. **Throttle as Velocity Observer**: Over short durations, motor command represents chassis acceleration; over longer windows, average motor throttle serves as a reliable proxy for linear velocity: \
    $`v_k = \text{EMA}_{\tau=0.5\text{s}}(\text{clamped\_speed})`$
 2. **Velocity Damping ($K_v = 0.8$)**: Directly subtracts a velocity term from the motor output to apply active braking.
-3. **Dynamic Setpoint Scheduling**: When the velocity observer detects steady forward motion ($v > 0$), the controller actively leans the robot *backward* by tilting the setpoint in the opposing direction:
-   $$\Delta \theta_{\text{vel}} = \arctan(C_v \cdot v)$$
-   $$\theta_{\text{setpoint}} = \theta_{\text{base}} - \text{degrees}\left(\arctan\left(C_v \cdot v - C_d \cdot e_{\text{dist}}\right)\right)$$
+3. **Dynamic Setpoint Scheduling**: When the velocity observer detects steady forward motion ($v > 0$), the controller actively leans the robot *backward* by tilting the setpoint in the opposing direction: \
+   $`\Delta \theta_{\text{vel}} = \arctan(C_v \cdot v)`$ \
+   $`\theta_{\text{setpoint}} = \theta_{\text{base}} - \text{degrees}\left(\arctan\left(C_v \cdot v - C_d \cdot e_{\text{dist}}\right)\right)`$ \
    Where $C_v = 0.10\text{ s/m}$. Leaning back against the direction of travel naturally decelerates the robot to a standstill.
    Applying $\arctan$ ensures that the dynamic setpoint always makes sense (in interval $(-90^\circ, 90^\circ)$).
 
@@ -286,8 +286,8 @@ To solve this without encoders:
 To prevent free-space drift and enable autonomous wall-tracking, the robot mounts an HC-SR04 ultrasonic rangefinder on its rear chassis:
 
 * **Non-Blocking Measurement**: Standard Adafruit/Python ultrasonic drivers block the CPU for up to $30\text{ ms}$ while waiting for the echo pulse, which would destroy a $200\text{ Hz}$ control loop. The [`NonblockingHCSR04`](hcsr04.py) driver fires a $10\text{ µs}$ pulse non-blockingly and uses hardware pulse timing via CircuitPython's `pulseio.PulseIn` interrupt buffer.
-* **Cascaded Distance Loop**:
-  $$e_{\text{dist}} = \text{clamp}\left(d_{\text{target}} - d_{\text{filtered}}, -e_{\max}, e_{\max}\right)$$
+* **Cascaded Distance Loop**: \
+  $`e_{\text{dist}} = \text{clamp}\left(d_{\text{target}} - d_{\text{filtered}}, -e_{\max}, e_{\max}\right)`$ \
   Where $d_{\text{target}} = 40.0\text{ cm}$, $e_{\max} = 20.0\text{ cm}$, and $C_d = 0.003\text{ rad/cm}$.
 
 When an obstacle approaches closer than $40\text{ cm}$, $e_{\text{dist}}$ turns negative, pitching the setpoint forward so the robot drives away until distance equilibrium is restored. The $\text{clamp}$ is needed to prevent massive overcorrection for erroneous or maximum range distances.
