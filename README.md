@@ -524,5 +524,5 @@ This project is licensed under the [MIT License](LICENSE).
 Developed as the Final Project for UCSD SPIS 2026 (Summer Program for Incoming Students) at the University of California, San Diego.
 
 Authors:
-- Rylex Phan (mechanical, electrical, testing)
 - Anthony Le (controls, electrical, tuning)
+- Gia (Rylex) Phan (mechanical, electrical, testing)
