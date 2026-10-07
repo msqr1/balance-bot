@@ -214,7 +214,7 @@ The error covariance $\mathbf{P}$ is propagated using process noise variances $Q
 $`\mathbf{P}_{k|k-1} = \mathbf{F} \mathbf{P}_{k-1|k-1} \mathbf{F}^T + \mathbf{Q} \Delta t`$
 
 ##### 2. Innovation & Kalman Gain
-With observation matrix $\mathbf{H} = \begin{bmatrix} 1 & 0 \end{bmatrix}$ and measurement covariance $R_{\text{measure}}$: \
+With observation matrix $`\mathbf{H} = \begin{bmatrix} 1 & 0 \end{bmatrix}`$ and measurement covariance $`R_{\text{measure}}`$: \
 $`S = P_{00} + R_{\text{measure}}`$ \
 $`\mathbf{K} = \begin{bmatrix} P_{00} / S \\ P_{10} / S \end{bmatrix}`$
 
