@@ -277,7 +277,7 @@ To solve this without encoders:
    $`\Delta \theta_{\text{vel}} = \arctan(C_v \cdot v)`$ \
    $`\theta_{\text{setpoint}} = \theta_{\text{base}} - \text{degrees}\left(\arctan\left(C_v \cdot v - C_d \cdot e_{\text{dist}}\right)\right)`$ \
    Where $C_v = 0.10\text{ s/m}$. Leaning back against the direction of travel naturally decelerates the robot to a standstill.
-   Applying $\arctan$ ensures that the dynamic setpoint always makes sense (in interval $(-90^\circ, 90^\circ)$).
+   Applying $\arctan$ ensures that the dynamic setpoint always makes sense (in interval $`(-90^\circ, 90^\circ)`$).
 
 ---
 
