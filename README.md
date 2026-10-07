@@ -398,6 +398,9 @@ flowchart TD
     FIL_PITCH -->|abort angle| KILL
 ```
 
+Note: The MPU-6050's internal low pass filter was actually likely not working because the Adafruit library contained a bug that prevented the filter from being configured. \
+After the project was completed, it was reported in https://github.com/adafruit/Adafruit_CircuitPython_MPU6050/issues/45 and solved in https://github.com/adafruit/Adafruit_CircuitPython_MPU6050/pull/47.
+
 ---
 
 ## Control Loop Layer Walkthrough
